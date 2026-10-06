@@ -15,6 +15,9 @@ class AccountRepository(private val prefs: SharedPreferences) {
 
     fun signIn(account: Account) {
         _account.value = account
+
+
+
         prefs.edit()
             .clear()
             .putString(NAME, account.name)
