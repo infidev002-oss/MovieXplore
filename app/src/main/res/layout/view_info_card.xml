@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The frosted-glass card over hero artwork on Home and Details: title, rating, meta, optional
+    overview, action + bookmark. The screen turns on the blur with GlassFrameLayout.enableBlur.
+-->
+<com.movies.myapplication.ui.common.GlassFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_info_card">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/info_title"
+            style="@style/Text.HeadlineSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2" />
+
+        <include
+            android:id="@+id/info_rating"
+            layout="@layout/view_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" />
+
+        <TextView
+            android:id="@+id/info_meta"
+            style="@style/Text.BodyMedium.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
+
+        <!-- Justified overview text (TextViewStyler spreads each full line to the card's width). -->
+        <com.movies.myapplication.textview.TextViewStyler
+            android:id="@+id/info_overview"
+            style="@style/Text.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:ellipsize="end"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/info_read_more"
+            style="@style/Text.Label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:stateListAnimator="@animator/press_scale"
+            android:gravity="center"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:text="Read More"
+            android:textColor="@color/link"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/info_action"
+                style="@style/Button.White"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:drawableStart="@drawable/ic_play"
+                android:drawablePadding="6dp"
+                android:drawableTint="@color/background"
+                android:textSize="16sp" />
+
+            <ImageButton
+                android:id="@+id/info_bookmark"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/bg_icon_button_outline"
+                android:stateListAnimator="@animator/press_scale"
+                android:contentDescription="Add to watchlist"
+                android:src="@drawable/ic_bookmark" />
+        </LinearLayout>
+
+        <!-- Opens the Watch Availability sheet: streaming services per country. Styled to match the bookmark. -->
+        <Button
+            android:id="@+id/info_watch_availability"
+            style="@style/Button.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_button_outline"
+            android:drawableStart="@drawable/ic_tv"
+            android:drawablePadding="8dp"
+            android:drawableTint="@color/text_primary"
+            android:text="Watch Availability"
+            android:textColor="@color/text_primary" />
+    </LinearLayout>
+</com.movies.myapplication.ui.common.GlassFrameLayout>

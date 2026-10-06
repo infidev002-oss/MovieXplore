@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Light tint over the live blur for the see-through hero button (Android 12+). Press feedback: @animator/press_scale. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <corners android:radius="100dp" />
+    <solid android:color="#33FFFFFF" />
+</shape>

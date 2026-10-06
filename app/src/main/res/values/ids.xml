@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- View tags used by ImageLoader to track which image a view is showing. -->
+    <item name="image_url" type="id" />
+    <item name="image_job" type="id" />
+</resources>

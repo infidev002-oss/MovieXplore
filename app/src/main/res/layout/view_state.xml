@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Loading spinner, or a message with an optional Retry button. Centered over the screen's content area. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/state_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="gone">
+
+    <ProgressBar
+        android:id="@+id/state_progress"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/primary" />
+
+    <LinearLayout
+        android:id="@+id/state_message_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="32dp">
+
+        <TextView
+            android:id="@+id/state_message"
+            style="@style/Text.Body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/text_secondary" />
+
+        <Button
+            android:id="@+id/state_retry"
+            style="@style/Button.Primary"
+            android:layout_width="160dp"
+            android:layout_marginTop="16dp"
+            android:text="Retry" />
+    </LinearLayout>
+</FrameLayout>

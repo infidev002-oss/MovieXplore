@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#FF0E1A26</color>
+    <color name="background_top">#FF1C3247</color>
+    <color name="surface">#FF182A3B</color>
+    <color name="surface_high">#FF263D53</color>
+    <color name="glass">#E61E3144</color>
+    <color name="outline">#FF8FA3B8</color>
+    <color name="outline_faint">#268FA3B8</color>
+    <color name="primary">#FF6A9BC3</color>
+    <color name="primary_tint">#1F6A9BC3</color>
+    <color name="text_primary">#FFF2F5F8</color>
+    <color name="text_secondary">#FF8C9DB0</color>
+    <!-- Quieter than text_secondary, for supporting lines under a title (still ~5:1 contrast on background). -->
+    <color name="text_tertiary">#FF7A8A9C</color>
+    <color name="star">#FFF5C518</color>
+    <color name="year">#FFE53935</color>
+    <color name="link">#FF4DA3FF</color>    <color name="scrim">#8C000000</color>
+    <color name="white_06">#0FFFFFFF</color>
+    <color name="white_15">#26FFFFFF</color>
+    <color name="panel">#FF0B1219</color>
+    <color name="panel_row">#FF151E28</color>
+</resources>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Row title with the app's signature accent bar on the left and, for rows with more to see, a
+    "See all" pill on the right. The whole header is the tap target; pressing it shrinks only the pill
+    (duplicateParentState), instead of highlighting the full width of the row.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:minHeight="52dp"
+    android:orientation="horizontal"
+    android:paddingStart="16dp"
+    android:paddingTop="14dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="12dp">
+
+    <View
+        android:layout_width="4dp"
+        android:layout_height="22dp"
+        android:background="@drawable/bg_section_accent" />
+
+    <TextView
+        android:id="@+id/section_title"
+        style="@style/Text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_weight="1"
+        android:accessibilityHeading="true"
+        android:ellipsize="end"
+        android:letterSpacing="-0.01"
+        android:maxLines="1"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/section_chevron"
+        style="@style/Text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_see_all"
+        android:drawableEnd="@drawable/ic_chevron_right_small"
+        android:drawablePadding="2dp"
+        android:duplicateParentState="true"
+        android:gravity="center_vertical"
+        android:importantForAccessibility="no"
+        android:paddingStart="12dp"
+        android:paddingTop="5dp"
+        android:paddingEnd="6dp"
+        android:paddingBottom="5dp"
+        android:stateListAnimator="@animator/press_scale"
+        android:text="See all"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp"
+        android:visibility="gone" />
+</LinearLayout>

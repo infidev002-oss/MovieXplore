@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    A poster card, used in rows and grids: rounded 2:3 artwork with a rating badge in the corner,
+    then the title and a "year • genre" line.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:stateListAnimator="@animator/press_scale"
+    android:orientation="vertical">
+
+    <com.movies.myapplication.ui.common.AspectRatioFrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_poster"
+        app:aspectRatio="0.6667">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:alpha="0.6"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_movie"
+            android:tint="@color/text_secondary" />
+
+        <ImageView
+            android:id="@+id/poster_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop" />
+
+        <!-- A faint edge on top of the artwork, so dark posters don't melt into the background. -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_poster_outline" />
+
+        <!-- Rating badge; hidden for titles nobody has rated yet. -->
+        <LinearLayout
+            android:id="@+id/poster_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_margin="6dp"
+            android:background="@drawable/bg_rating_badge"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="6dp"
+            android:paddingTop="3dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="3dp">
+
+            <ImageView
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_star"
+                android:tint="@color/star" />
+
+            <TextView
+                android:id="@+id/rating_value"
+                style="@style/Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="3dp"
+                android:fontFamily="sans-serif-medium"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Only the Watchlist shows this, to remove a title. -->
+        <ImageButton
+            android:id="@+id/poster_bookmark"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="4dp"
+            android:background="@drawable/bg_bookmark"
+            android:stateListAnimator="@animator/press_scale"
+            android:contentDescription="Remove from watchlist"
+            android:padding="9dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_bookmark_filled"
+            android:visibility="gone" />
+    </com.movies.myapplication.ui.common.AspectRatioFrameLayout>
+
+    <!-- Title first: bright, bold and larger, so it clearly leads. -->
+    <TextView
+        android:id="@+id/poster_title"
+        style="@style/Text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/text_primary"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <!-- Supporting detail: smaller and dimmer, so it reads as secondary. -->
+    <TextView
+        android:id="@+id/poster_meta"
+        style="@style/Text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:ellipsize="end"
+        android:letterSpacing="0.02"
+        android:maxLines="1"
+        android:textColor="@color/text_tertiary"
+        android:textSize="12sp" />
+</LinearLayout>

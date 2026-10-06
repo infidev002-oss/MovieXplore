@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Movies</string>
+
+    <!-- Account screen links. Rows whose value is empty show "Not available yet" until filled in. -->
+    <string name="privacy_policy_url" translatable="false"></string>
+    <string name="terms_url" translatable="false"></string>
+    <string name="feedback_email" translatable="false"></string>
+</resources>

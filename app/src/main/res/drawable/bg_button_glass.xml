@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See-through secondary button over artwork (e.g. "My List" on the Home hero). Press feedback: @animator/press_scale. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <corners android:radius="100dp" />
+    <solid android:color="#40FFFFFF" />
+    <stroke android:width="1dp" android:color="#33FFFFFF" />
+</shape>

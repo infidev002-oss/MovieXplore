@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AspectRatioFrameLayout">
+        <!-- Width divided by height, e.g. 0.6667 for a 2:3 poster or 1.7778 for 16:9. -->
+        <attr name="aspectRatio" format="float" />
+    </declare-styleable>
+</resources>

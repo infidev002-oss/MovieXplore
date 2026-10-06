@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Hosts the four tabs; only the selected tab's view is visible. The floating tab bar sits on top. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/tab_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Frosted glass over the scrolling content (blur turned on in MainActivity, Android 12+). -->
+    <com.movies.myapplication.ui.common.GlassFrameLayout
+        android:id="@+id/nav_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_nav_bar"
+        android:elevation="8dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="10dp">
+
+            <ImageButton
+                android:id="@+id/tab_home"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:background="@drawable/bg_nav_item"
+                android:stateListAnimator="@animator/press_scale"
+                android:contentDescription="Home"
+                android:src="@drawable/ic_home" />
+
+            <ImageButton
+                android:id="@+id/tab_watchlist"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="20dp"
+                android:background="@drawable/bg_nav_item"
+                android:stateListAnimator="@animator/press_scale"
+                android:contentDescription="Watchlist"
+                android:src="@drawable/ic_bookmark" />
+
+            <ImageButton
+                android:id="@+id/tab_mood"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="20dp"
+                android:background="@drawable/bg_nav_item"
+                android:stateListAnimator="@animator/press_scale"
+                android:contentDescription="Mood"
+                android:src="@drawable/ic_mood" />
+
+            <ImageButton
+                android:id="@+id/tab_profile"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="20dp"
+                android:background="@drawable/bg_nav_item"
+                android:stateListAnimator="@animator/press_scale"
+                android:contentDescription="Profile"
+                android:src="@drawable/ic_person" />
+        </LinearLayout>
+    </com.movies.myapplication.ui.common.GlassFrameLayout>
+</FrameLayout>
