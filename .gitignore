@@ -13,3 +13,9 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+
+.idea/
+# Never commit local config
+google-services.json
+app/google-services.json

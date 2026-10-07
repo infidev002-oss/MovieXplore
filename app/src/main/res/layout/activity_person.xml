@@ -93,7 +93,7 @@
                     android:textStyle="bold" />
 
                 <!-- Justified biography text (TextViewStyler spreads each full line to the width). -->
-                <com.movies.myapplication.textview.TextViewStyler
+                <com.movies.moviexplore.textview.TextViewStyler
                     android:id="@+id/person_bio"
                     style="@style/Text.Body"
                     android:layout_width="match_parent"
@@ -128,6 +128,12 @@
     <include
         android:id="@+id/person_state"
         layout="@layout/view_state" />
+
+    <include
+        layout="@layout/view_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
 
     <include layout="@layout/view_back_button" />
 </FrameLayout>

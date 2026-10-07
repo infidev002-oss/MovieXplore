@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    One language / country choice: a glass card with a round badge (language code or flag), the name with
+    a second line (native name), and a ring that becomes a filled check when selected. Padding gives the
+    gap between cards, so the list needs no divider.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="20dp"
+    android:paddingTop="5dp"
+    android:paddingEnd="20dp"
+    android:paddingBottom="5dp">
+
+    <LinearLayout
+        android:id="@+id/option_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_onboarding_option"
+        android:duplicateParentState="true"
+        android:gravity="center_vertical"
+        android:minHeight="64dp"
+        android:orientation="horizontal"
+        android:paddingStart="12dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="10dp"
+        android:stateListAnimator="@animator/press_scale">
+
+        <TextView
+            android:id="@+id/option_badge"
+            style="@style/Text.Label"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:background="@drawable/bg_round"
+            android:gravity="center"
+            android:importantForAccessibility="no"
+            android:maxLines="1"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/option_title"
+                style="@style/Text.Label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/option_subtitle"
+                style="@style/Text.BodySmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/text_secondary" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/option_mark"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/bg_onboarding_radio">
+
+            <ImageView
+                android:id="@+id/option_check"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_check"
+                android:tint="@color/background" />
+        </FrameLayout>
+    </LinearLayout>
+</FrameLayout>

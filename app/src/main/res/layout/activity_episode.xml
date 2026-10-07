@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.movies.myapplication.ui.common.AspectRatioFrameLayout
+            <com.movies.moviexplore.ui.common.AspectRatioFrameLayout
                 android:id="@+id/episode_art_frame"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
                     android:layout_height="120dp"
                     android:layout_gravity="bottom"
                     android:background="@drawable/bg_gradient_bottom" />
-            </com.movies.myapplication.ui.common.AspectRatioFrameLayout>
+            </com.movies.moviexplore.ui.common.AspectRatioFrameLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -129,6 +129,12 @@
         android:layout_height="40dp"
         android:alpha="0"
         android:background="@drawable/bg_status_scrim" />
+
+    <include
+        layout="@layout/view_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
 
     <include layout="@layout/view_back_button" />
 </FrameLayout>

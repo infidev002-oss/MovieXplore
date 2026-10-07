@@ -65,4 +65,6 @@
             android:id="@+id/season_state"
             layout="@layout/view_state" />
     </FrameLayout>
+
+    <include layout="@layout/view_banner" />
 </LinearLayout>

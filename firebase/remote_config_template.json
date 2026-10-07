@@ -1,0 +1,25 @@
+{
+  "parameters": {
+    "Update_App": {
+      "defaultValue": {
+        "value": "{\"appTitle\":\"New App Update Available!\",\"appDesc\":\"Update now to enjoy the latest features & improvements.\",\"appIcon\":\"https://play-lh.googleusercontent.com/Gqxk4T0uZsDwFp07DE-508hkyvcNmgFuRwPiwTEfF7D7OzGv1FdHDzEyMxNsSBZLOJlGpe3ULvVM2RgrRAlBqA=w480-h960-rw\",\"appURL\":\"https://play.google.com/store/apps/details?id=com.whatsapp\"}"
+      },
+      "valueType": "JSON"
+    },
+    "Data": {
+      "defaultValue": {
+        "value": "{\"APP_SETTINGS\":{\"ad_status\":true,\"SplashCounter\":30,\"InterAdInterval\":45,\"NativeAdInterval\":20,\"URLAdInterval\":20,\"ppLink\":\"https://example.com/privacy_policy.html\",\"tncLink\":\"https://example.com/terms.html\",\"gle_banner_id1\":{\"id\":[\"ca-app-pub-3940256099942544/9214589741\"],\"isEnabled\":true},\"gle_banner_id2\":{\"id\":[\"ca-app-pub-3940256099942544/9214589741\"],\"isEnabled\":true},\"gle_banner_id3\":{\"id\":[\"ca-app-pub-3940256099942544/9214589741\"],\"isEnabled\":true},\"gle_native_ob\":{\"id\":[\"ca-app-pub-3940256099942544/2247696110\"],\"isEnabled\":true,\"heightCTA\":40},\"gle_native_home\":{\"id\":[\"ca-app-pub-3940256099942544/2247696110\"],\"isEnabled\":true,\"heightCTA\":40},\"gle_native_settings\":{\"id\":[\"ca-app-pub-3940256099942544/2247696110\"],\"isEnabled\":true,\"heightCTA\":40},\"gle_native_category\":{\"id\":[\"ca-app-pub-3940256099942544/2247696110\"],\"isEnabled\":true,\"heightCTA\":40},\"gle_inter_id\":{\"id\":[\"ca-app-pub-3940256099942544/1033173712\"],\"isEnabled\":true},\"gle_splashInter_id\":{\"id\":[\"ca-app-pub-3940256099942544/1033173712\"],\"isEnabled\":true},\"gle_welcome_inter_id\":{\"id\":[\"ca-app-pub-3940256099942544/1033173712\"],\"isEnabled\":true},\"min_supported_version\":1}}"
+      },
+      "valueType": "JSON"
+    }
+  },
+  "version": {
+    "versionNumber": "1",
+    "updateTime": "2026-10-01T00:00:00.000000Z",
+    "updateUser": {
+      "email": "developer@example.com"
+    },
+    "updateOrigin": "CONSOLE",
+    "updateType": "INCREMENTAL_UPDATE"
+  }
+}

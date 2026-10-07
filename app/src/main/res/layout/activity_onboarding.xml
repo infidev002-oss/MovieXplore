@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Onboarding (first run): one screen whose three pages (language, country, how it works) slide sideways.
+    The step dashes at the top and the Previous / Next buttons at the bottom stay in place while the page
+    between them scrolls.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/onboarding_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Dashes for the steps (like the Home hero indicator) and "Step X of 3"; filled in OnboardingActivity. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="20dp">
+
+        <LinearLayout
+            android:id="@+id/onboarding_steps"
+            android:layout_width="0dp"
+            android:layout_height="4dp"
+            android:layout_weight="1"
+            android:orientation="horizontal" />
+
+        <TextView
+            android:id="@+id/onboarding_step_label"
+            style="@style/Text.BodySmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_secondary" />
+    </LinearLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/onboarding_pager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <include layout="@layout/view_onboarding_nav" />
+</LinearLayout>

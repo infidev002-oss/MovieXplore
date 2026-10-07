@@ -3,7 +3,7 @@
     The frosted-glass card over hero artwork on Home and Details: title, rating, meta, optional
     overview, action + bookmark. The screen turns on the blur with GlassFrameLayout.enableBlur.
 -->
-<com.movies.myapplication.ui.common.GlassFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.movies.moviexplore.ui.common.GlassFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_info_card">
@@ -37,7 +37,7 @@
             android:layout_marginTop="4dp" />
 
         <!-- Justified overview text (TextViewStyler spreads each full line to the card's width). -->
-        <com.movies.myapplication.textview.TextViewStyler
+        <com.movies.moviexplore.textview.TextViewStyler
             android:id="@+id/info_overview"
             style="@style/Text.Body"
             android:layout_width="match_parent"
@@ -103,4 +103,4 @@
             android:text="Watch Availability"
             android:textColor="@color/text_primary" />
     </LinearLayout>
-</com.movies.myapplication.ui.common.GlassFrameLayout>
+</com.movies.moviexplore.ui.common.GlassFrameLayout>

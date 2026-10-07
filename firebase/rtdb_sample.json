@@ -1,0 +1,30 @@
+{
+  "Users": {
+    "sampleUid123": {
+      "Profile": {
+        "email": "sample@example.com",
+        "name": "Sample User",
+        "createdAt": 1759363200000,
+        "lastAppOpenAt": 1759363200000
+      },
+      "watchlist": {
+        "movie_550": {
+          "uniqueId": "movie_550",
+          "id": "550",
+          "title": "Fight Club",
+          "type": "movie",
+          "posterPath": "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+          "timestamp": 1759363200000
+        },
+        "tv_1399": {
+          "uniqueId": "tv_1399",
+          "id": "1399",
+          "title": "Game of Thrones",
+          "type": "tv",
+          "posterPath": "/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg",
+          "timestamp": 1759363260000
+        }
+      }
+    }
+  }
+}

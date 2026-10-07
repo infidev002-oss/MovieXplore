@@ -42,10 +42,22 @@
             android:text="TV Shows" />
     </LinearLayout>
 
+    <!-- Native ad on a genre's list only (kit NativeAds, RemoteValues.NATIVE_CATEGORY); shown by NativeAds.attach. -->
+    <FrameLayout
+        android:id="@+id/grid_native"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone" />
+
     <include
         android:id="@+id/screen_grid"
         layout="@layout/view_media_grid"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
+
+    <include layout="@layout/view_banner" />
 </LinearLayout>

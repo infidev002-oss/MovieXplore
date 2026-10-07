@@ -10,7 +10,7 @@
     android:stateListAnimator="@animator/press_scale"
     android:orientation="vertical">
 
-    <com.movies.myapplication.ui.common.AspectRatioFrameLayout
+    <com.movies.moviexplore.ui.common.AspectRatioFrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_poster"
@@ -84,7 +84,7 @@
             android:scaleType="fitCenter"
             android:src="@drawable/ic_bookmark_filled"
             android:visibility="gone" />
-    </com.movies.myapplication.ui.common.AspectRatioFrameLayout>
+    </com.movies.moviexplore.ui.common.AspectRatioFrameLayout>
 
     <!-- Title first: bright, bold and larger, so it clearly leads. -->
     <TextView

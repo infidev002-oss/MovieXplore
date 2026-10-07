@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    A banner ad slot (kit BannerAd): an "Advertisement" label until the ad loads, then the ad.
+    Hidden until BannerAd.load shows it; stays hidden when the unit is off or no ad fills.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/banner_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/background"
+    android:minHeight="50dp"
+    android:visibility="gone">
+
+    <TextView
+        android:id="@+id/banner_label"
+        style="@style/Text.BodySmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Advertisement"
+        android:textColor="@color/text_tertiary" />
+
+    <FrameLayout
+        android:id="@+id/banner_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</FrameLayout>

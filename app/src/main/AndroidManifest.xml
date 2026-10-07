@@ -2,13 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!--
         Every screen handles size/orientation/theme changes itself instead of being recreated, so its
         MVI store simply carries on (no ViewModel needed). Layouts use match_parent/weights, so they adapt.
     -->
     <application
-        android:name=".MovieApp"
+        android:name=".MovieXploreApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true"
@@ -17,14 +19,22 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MyApplication"
+        android:theme="@style/Theme.MovieXplore"
         android:usesCleartextTraffic="false">
 
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobAppId}" />
+
+        <meta-data
+            android:name="com.google.android.gms.ads.flag.NATIVE_AD_DEBUGGER_ENABLED"
+            android:value="false" />
+
+        <!-- The splash handles rotation itself; the kit's SplashFlow runs the startup sequence. -->
         <activity
-            android:name=".ui.main.MainActivity"
-            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode|density"
-            android:exported="true"
-            android:windowSoftInputMode="adjustResize">
+            android:name=".ui.splash.SplashActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,6 +42,22 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ads.WelcomeBackActivity"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.onboarding.OnboardingActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode|density"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.main.MainActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode|density"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.signin.SignInActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode|density" />
         <activity
             android:name=".ui.browse.BrowseActivity"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode|density"

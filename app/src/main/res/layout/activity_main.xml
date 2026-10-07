@@ -11,7 +11,7 @@
         android:layout_height="match_parent" />
 
     <!-- Frosted glass over the scrolling content (blur turned on in MainActivity, Android 12+). -->
-    <com.movies.myapplication.ui.common.GlassFrameLayout
+    <com.movies.moviexplore.ui.common.GlassFrameLayout
         android:id="@+id/nav_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -68,5 +68,5 @@
                 android:contentDescription="Profile"
                 android:src="@drawable/ic_person" />
         </LinearLayout>
-    </com.movies.myapplication.ui.common.GlassFrameLayout>
+    </com.movies.moviexplore.ui.common.GlassFrameLayout>
 </FrameLayout>

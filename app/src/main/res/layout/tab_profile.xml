@@ -134,6 +134,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
 
+            <!-- Native ad (kit NativeAds, RemoteValues.NATIVE_SETTINGS); shown by NativeAds.attach. -->
+            <FrameLayout
+                android:id="@+id/profile_native"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:visibility="gone" />
+
             <LinearLayout
                 android:id="@+id/profile_tmdb"
                 android:layout_width="match_parent"

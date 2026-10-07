@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- A 16:9 still or trailer frame with a play icon on top. -->
-<com.movies.myapplication.ui.common.AspectRatioFrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+<com.movies.moviexplore.ui.common.AspectRatioFrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_rounded_placeholder"
@@ -19,4 +19,4 @@
         android:layout_gravity="center"
         android:importantForAccessibility="no"
         android:src="@drawable/ic_play_circle" />
-</com.movies.myapplication.ui.common.AspectRatioFrameLayout>
+</com.movies.moviexplore.ui.common.AspectRatioFrameLayout>

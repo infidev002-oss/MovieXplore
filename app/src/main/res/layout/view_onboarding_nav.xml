@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Bottom buttons shared by the onboarding steps: Previous (outline pill) on the left, Next / Start (white pill)
+    on the right. Both are compact; step 1 hides Previous, so only Next shows, on the right.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="20dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="20dp"
+    android:paddingBottom="12dp">
+
+    <Button
+        android:id="@+id/onboarding_prev"
+        style="@style/Button.Outline"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:minWidth="96dp"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:text="Previous"
+        android:textSize="14sp" />
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <Button
+        android:id="@+id/onboarding_next"
+        style="@style/Button.White"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:minWidth="96dp"
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:text="Next"
+        android:textSize="14sp" />
+</LinearLayout>

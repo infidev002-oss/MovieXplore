@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- View tags used by NativeAds to track what a slot shows. -->
+    <item name="ads_native_slot_ad" type="id" />
+    <item name="ads_native_slot_size" type="id" />
+</resources>
