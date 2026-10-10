@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Invisible divider: the gap between Mood tiles, across a row and between rows. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <size
+        android:width="@dimen/mood_tile_gap"
+        android:height="@dimen/mood_tile_gap" />
+    <solid android:color="@android:color/transparent" />
+</shape>

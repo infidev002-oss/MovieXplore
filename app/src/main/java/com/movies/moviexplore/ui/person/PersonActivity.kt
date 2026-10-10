@@ -18,7 +18,6 @@ import com.movies.moviexplore.ui.common.Navigator
 import com.movies.moviexplore.ui.common.addMediaRow
 import com.movies.moviexplore.ui.common.makeExpandable
 import com.movies.moviexplore.ui.common.padForSystemBars
-import com.movies.moviexplore.ui.common.placeBelowStatusBar
 import com.movies.moviexplore.ui.common.renderState
 import com.movies.moviexplore.ui.common.show
 
@@ -30,13 +29,11 @@ class PersonActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_person)
-        bindBanner(this, RemoteValues.BANNER_DETAILS, findViewById(R.id.banner_root), content = findViewById(R.id.person_scroll))
+        bindBanner(this, RemoteValues.BANNER_INFO, findViewById(R.id.banner_root), atBottom = false, inline = true)
         val store = PersonStore(MediaRepository.shared, intent.getIntExtra(Navigator.EXTRA_ID, 0)).attach()
 
-        findViewById<View>(R.id.floating_back).apply {
-            placeBelowStatusBar()
-            setOnClickListener { finish() }
-        }
+        // Inside the scrolling header, which already starts below the status bar.
+        findViewById<View>(R.id.floating_back).setOnClickListener { finish() }
         val scroll = findViewById<ScrollView>(R.id.person_scroll)
         scroll.padForSystemBars(top = true, bottom = true)
         findViewById<View>(R.id.person_photo_frame).clipToOutline = true

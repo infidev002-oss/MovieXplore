@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!-- android:tint on ImageView works on every supported API level (minSdk 26). app:tint would need the
+         AppCompat inflater, which bottom-sheet dialogs don't use, so the icons there would lose their tint. -->
+    <issue id="UseAppTint" severity="warning" />
+    <!-- TextViewStyler draws its own text; a plain TextView works on every API level. -->
+    <issue id="AppCompatCustomView" severity="warning" />
+</lint>

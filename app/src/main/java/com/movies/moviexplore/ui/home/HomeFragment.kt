@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.graphics.Paint
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.text.SpannableStringBuilder
 import android.text.Spanned
@@ -27,15 +26,14 @@ import com.movies.moviexplore.data.MediaRepository
 import com.movies.moviexplore.data.model.Media
 import com.movies.moviexplore.data.model.MediaType
 import com.movies.moviexplore.data.model.TmdbImage
+import com.movies.moviexplore.ui.common.dimen
+import com.movies.moviexplore.ui.common.inflate
 import com.movies.moviexplore.ui.common.GlassFrameLayout
 import com.movies.moviexplore.ui.common.ImageLoader
 import com.movies.moviexplore.ui.common.Navigator
 import com.movies.moviexplore.ui.common.addMediaRow
-import com.movies.moviexplore.ui.common.bindBanner
 import com.movies.moviexplore.ui.common.dp
 import com.movies.moviexplore.ui.common.formatRating
-import com.movies.moviexplore.ui.common.onSystemBars
-import com.movies.moviexplore.ui.common.padForSystemBars
 import com.movies.moviexplore.ui.common.renderState
 import com.movies.moviexplore.ui.common.show
 import com.movies.moviexplore.ui.common.showAppToast
@@ -50,12 +48,16 @@ import kotlin.math.abs
 class HomeFragment : TabFragment(R.layout.tab_home) {
 
     private lateinit var store: HomeStore
+    private val homeNative by lazy { NativeAds.viewModel(this, RemoteValues.NATIVE_HOME) }
 
     private lateinit var root: View
     private lateinit var scroll: ScrollView
     private lateinit var rows: LinearLayout
     private lateinit var stateView: View
     private lateinit var scrim: View
+
+    // Each padded view's own side padding from the layout, by id; refilled for every new view.
+    private val sidePadding = mutableMapOf<Int, Pair<Int, Int>>()
     private lateinit var hero: View
     private lateinit var heroImage: ImageView
     private lateinit var heroPrev: ImageView
@@ -73,8 +75,6 @@ class HomeFragment : TabFragment(R.layout.tab_home) {
     private var autoAdvance: Job? = null
     private var slideAnimator: ValueAnimator? = null
 
-    private val homeNative by lazy { NativeAds.viewModel(this, RemoteValues.NATIVE_HOME) }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         store = HomeStore(MediaRepository.shared)
@@ -82,6 +82,7 @@ class HomeFragment : TabFragment(R.layout.tab_home) {
 
     override fun onTabViewCreated(view: View) {
         root = view
+        sidePadding.clear()
         scroll = view.findViewById(R.id.home_scroll)
         rows = view.findViewById(R.id.home_rows)
         stateView = view.findViewById(R.id.home_state)
@@ -100,23 +101,21 @@ class HomeFragment : TabFragment(R.layout.tab_home) {
         renderedSections = null
 
         val activity = requireActivity()
-        view.findViewById<View>(R.id.home_top_tabs).padForSystemBars(top = true)
         view.findViewById<View>(R.id.home_tab_movies).setOnClickListener { Navigator.browse(activity, MediaType.MOVIE, "Movie") }
         view.findViewById<View>(R.id.home_tab_tv).setOnClickListener { Navigator.browse(activity, MediaType.TV, "TV Shows") }
         view.findViewById<TextView>(R.id.home_tab_home).apply { paintFlags = paintFlags or Paint.UNDERLINE_TEXT_FLAG }
 
         // The hero art has its own dark top edge; the scrim only appears once rows scroll under the status bar.
-        scrim.onSystemBars { bars -> scrim.layoutParams = scrim.layoutParams.apply { height = bars.top + view.dp(16) } }
         scroll.setOnScrollChangeListener { _, _, y, _, _ ->
             val target = if (y > hero.height - scrim.height) 1f else 0f
             if (scrim.alpha != target) scrim.animate().alpha(target).setDuration(150).start()
         }
 
-        // The hero takes about 60% of the screen, so the first rows show without scrolling.
-        val screenHeight = resources.displayMetrics.heightPixels
-        hero.layoutParams = hero.layoutParams.apply { height = (screenHeight * 0.62f).toInt() }
-        view.findViewById<View>(R.id.hero_fade).apply {
-            layoutParams = layoutParams.apply { height = (screenHeight * 0.4f).toInt() }
+        // The hero takes about 60% of the screen, so the first rows show without scrolling. The screen handles
+        // rotation itself, so it is re-fitted whenever the screen's height changes.
+        fitHero(view, resources.displayMetrics.heightPixels)
+        view.addOnLayoutChangeListener { _, _, top, _, bottom, _, oldTop, _, oldBottom ->
+            if (bottom - top != oldBottom - oldTop) view.post { fitHero(view, resources.displayMetrics.heightPixels) }
         }
 
         view.findViewById<View>(R.id.hero_info).setOnClickListener {
@@ -138,21 +137,18 @@ class HomeFragment : TabFragment(R.layout.tab_home) {
         }
         enableHeroSwipe()
 
-        activity.bindBanner(viewLifecycleOwner, RemoteValues.BANNER_HOME, view.findViewById(R.id.home_banner), atBottom = false)
         NativeAds.attach(viewLifecycleOwner, homeNative, view.findViewById(R.id.home_native), RemoteValues.NATIVE_HOME, NativeSize.MEDIUM)
 
         viewScope.launch { store.state.collect { render(it) } }
     }
 
-    override fun onResume() {
-        super.onResume()
-        if (!isHidden) homeNative.refreshIfNeeded(RemoteValues.NATIVE_HOME)
-    }
-
-    // Tabs are switched with hide/show, so coming back to Home doesn't resume the fragment.
-    override fun onHiddenChanged(hidden: Boolean) {
-        super.onHiddenChanged(hidden)
-        if (!hidden && isResumed) homeNative.refreshIfNeeded(RemoteValues.NATIVE_HOME)
+    /**
+     * The hero artwork runs up under the status bar, so its top tabs are pushed below it. While MainActivity's
+     * top banner shows ([px] = 0), the tabs keep just a small gap under the banner instead.
+     */
+    override fun applyTopSpace(view: View, px: Int) {
+        view.findViewById<View>(R.id.home_top_tabs).padTop(if (px > 0) px else view.dimen(R.dimen.home_banner_gap))
+        fitStatusScrim(scrim, px)
     }
 
     private fun render(state: HomeUiState) {
@@ -226,21 +222,31 @@ class HomeFragment : TabFragment(R.layout.tab_home) {
     private fun buildIndicator() {
         indicator.removeAllViews()
         heroItems.indices.forEach { i ->
-            val dot = View(requireContext())
-            indicator.addView(dot, LinearLayout.LayoutParams(root.dp(16), root.dp(4)).apply { if (i > 0) marginStart = root.dp(6) })
+            val dot = indicator.inflate(R.layout.item_indicator_dot)
+            indicator.addView(dot)
             styleDot(dot, i == heroIndex)
         }
     }
 
+    /** The current slide's dot is wider and in the accent colour. */
     private fun styleDot(dot: View, selected: Boolean) {
-        dot.layoutParams = dot.layoutParams.apply { width = root.dp(if (selected) 32 else 16) }
-        dot.background = GradientDrawable().apply {
-            cornerRadius = root.dp(2).toFloat()
-            setColor(if (selected) requireContext().getColor(R.color.primary) else 0x998C9DB0.toInt())
+        dot.layoutParams = dot.layoutParams.apply {
+            width = root.dimen(if (selected) R.dimen.indicator_dot_width_selected else R.dimen.indicator_dot_width)
         }
+        dot.setBackgroundResource(if (selected) R.drawable.bg_indicator_dot_on else R.drawable.bg_indicator_dot_off)
     }
 
     private fun wrap(i: Int) = (i + heroItems.size) % heroItems.size
+
+    /** Hero = 62% of [screenHeight], its bottom fade 40%. */
+    private fun fitHero(view: View, screenHeight: Int) {
+        val heroHeight = (screenHeight * 0.62f).toInt()
+        if (hero.layoutParams.height == heroHeight) return
+        hero.layoutParams = hero.layoutParams.apply { height = heroHeight }
+        view.findViewById<View>(R.id.hero_fade).apply {
+            layoutParams = layoutParams.apply { height = (screenHeight * 0.4f).toInt() }
+        }
+    }
 
     private fun heroWidth(): Float = (hero.width.takeIf { it > 0 } ?: resources.displayMetrics.widthPixels).toFloat()
 
@@ -348,8 +354,37 @@ class HomeFragment : TabFragment(R.layout.tab_home) {
 
     override fun onScrollToTop() = scroll.scrollTo(0, 0)
 
+    // Native refresh: once per visit, only while Home is the visible tab.
+    override fun onResume() {
+        super.onResume()
+        if (!isHidden) homeNative.refreshIfNeeded(RemoteValues.NATIVE_HOME)
+    }
+
+    override fun onHiddenChanged(hidden: Boolean) {
+        super.onHiddenChanged(hidden)
+        if (!hidden) homeNative.refreshIfNeeded(RemoteValues.NATIVE_HOME)
+    }
+
     override fun applyBottomSpace(px: Int) {
         scroll.setPadding(0, 0, 0, px)
+    }
+
+    /**
+     * The hero artwork runs under the side navigation bar and camera cutout (landscape); its text and buttons,
+     * the rows, the ads (which must never sit under system buttons) and the loading state stay clear of them.
+     */
+    override fun applySideSpace(view: View, left: Int, right: Int) {
+        listOf(R.id.home_top_tabs, R.id.hero_details, R.id.home_rows, R.id.home_native, R.id.home_state)
+            .mapNotNull { view.findViewById<View>(it) }
+            .forEach { target ->
+                // On top of the view's own side padding (e.g. the hero text's 24dp), remembered from the layout.
+                val (baseLeft, baseRight) = sidePadding.getOrPut(target.id) { target.paddingLeft to target.paddingRight }
+                val padLeft = baseLeft + left
+                val padRight = baseRight + right
+                if (target.paddingLeft != padLeft || target.paddingRight != padRight) {
+                    target.setPadding(padLeft, target.paddingTop, padRight, target.paddingBottom)
+                }
+            }
     }
 
     override fun onDestroyView() {
@@ -364,3 +399,6 @@ class HomeFragment : TabFragment(R.layout.tab_home) {
         super.onDestroy()
     }
 }
+
+/** Space (dp) between the top banner and the hero tabs while the banner shows. */
+private const val BANNER_GAP_DP = 8

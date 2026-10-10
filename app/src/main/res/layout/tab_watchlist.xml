@@ -4,36 +4,36 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
+    <LinearLayout
         android:id="@+id/watchlist_title"
-        style="@style/Text.TitleLarge"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:accessibilityHeading="true"
-        android:gravity="center"
-        android:minHeight="56dp"
-        android:paddingTop="14dp"
-        android:text="Watchlist"
-        android:textColor="@color/text_secondary" />
+        style="@style/TabHeader">
+
+        <TextView
+            style="@style/Text.TabTitle"
+            android:text="Watchlist" />
+
+        <TextView
+            style="@style/Text.TabSubtitle"
+            android:text="Movies and shows you saved" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingTop="12dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="12dp">
+        android:paddingStart="@dimen/_13sdp"
+        android:paddingEnd="@dimen/_13sdp"
+        android:paddingBottom="@dimen/_10sdp">
 
         <TextView
             android:id="@+id/watchlist_movies"
             style="@style/Text.Body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="20dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="10dp"
+            android:paddingStart="@dimen/_17sdp"
+            android:paddingTop="@dimen/_8sdp"
+            android:paddingEnd="@dimen/_17sdp"
+            android:paddingBottom="@dimen/_8sdp"
             android:text="Movie" />
 
         <TextView
@@ -41,11 +41,11 @@
             style="@style/Text.Body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:paddingStart="20dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="10dp"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:paddingStart="@dimen/_17sdp"
+            android:paddingTop="@dimen/_8sdp"
+            android:paddingEnd="@dimen/_17sdp"
+            android:paddingBottom="@dimen/_8sdp"
             android:text="TV Shows" />
     </LinearLayout>
 

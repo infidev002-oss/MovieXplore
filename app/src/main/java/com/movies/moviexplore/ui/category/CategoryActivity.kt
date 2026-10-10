@@ -3,6 +3,7 @@ package com.movies.moviexplore.ui.category
 import android.os.Bundle
 import android.view.View
 import com.movies.moviexplore.R
+import com.movies.moviexplore.ads.NativeAdRowAdapter
 import com.movies.moviexplore.ads.NativeAds
 import com.movies.moviexplore.ads.NativeSize
 import com.movies.moviexplore.config.RemoteValues
@@ -21,7 +22,7 @@ import com.movies.moviexplore.ui.common.onSystemBars
 class CategoryActivity : BaseActivity() {
 
     private val categoryNative by lazy { NativeAds.viewModel(this, RemoteValues.NATIVE_CATEGORY) }
-    private val isGenreList get() = intent.getStringExtra(Navigator.EXTRA_LIST) == CategoryList.GENRE.name
+    private var nativeRow: NativeAdRowAdapter? = null   // genre lists only
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +35,10 @@ class CategoryActivity : BaseActivity() {
             genreId = intent.getIntExtra(Navigator.EXTRA_GENRE, 0),
         )
         val store = CategoryStore(MediaRepository.shared, request).attach()
+        // The category ads (native first in the grid, banner at the bottom) belong to a selected genre's list
+        // only, not to Trending / Popular / Top Rated.
+        val isGenreList = request.list == CategoryList.GENRE
+        if (isGenreList) nativeRow = NativeAdRowAdapter(this, categoryNative, RemoteValues.NATIVE_CATEGORY, NativeSize.MEDIUM)
 
         findViewById<View>(R.id.top_bar).bindTopBar(request.title, onBack = ::finish)
         val gridRoot = findViewById<View>(R.id.screen_grid)
@@ -42,20 +47,17 @@ class CategoryActivity : BaseActivity() {
             onOpen = { Navigator.details(this, it.id, it.type) },
             onRetry = { store.onIntent(CategoryIntent.Retry) },
             onLoadMore = { store.onIntent(CategoryIntent.LoadMore) },
+            nativeRow = nativeRow,
         )
         gridRoot.onSystemBars { bars -> grid.setBottomSpace(bars.bottom) }
 
         store.state.observe { grid.render(it.items, it.isLoading, it.isLoadingMore, it.error) }
 
-        bindBanner(this, RemoteValues.BANNER_LIST, findViewById(R.id.banner_root))
-        // The category native belongs to a selected genre's list only, not to Trending / Popular / Top Rated.
-        if (request.list == CategoryList.GENRE) {
-            NativeAds.attach(this, categoryNative, findViewById(R.id.grid_native), RemoteValues.NATIVE_CATEGORY, NativeSize.MEDIUM)
-        }
+        if (isGenreList) bindBanner(this, RemoteValues.BANNER_CAT, findViewById(R.id.banner_root))
     }
 
     override fun onResume() {
         super.onResume()
-        if (isGenreList) categoryNative.refreshIfNeeded(RemoteValues.NATIVE_CATEGORY)
+        nativeRow?.onScreenVisible()   // one native refresh per visit
     }
 }

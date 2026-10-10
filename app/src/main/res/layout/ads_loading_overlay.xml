@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="100dp"
-    android:background="#E6202020"
+    android:background="@drawable/ads_banner_placeholder"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="20dp">

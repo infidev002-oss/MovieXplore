@@ -8,6 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.movies.moviexplore.R
 
 /**
@@ -16,7 +18,7 @@ import com.movies.moviexplore.R
  */
 fun Activity.showBottomSheet(layout: Int, onDismiss: () -> Unit, bind: (dialog: Dialog, sheet: View) -> Unit): Dialog {
     val dialog = Dialog(this, R.style.BottomSheetDialog)
-    val root = FrameLayout(this)
+    val root = LayoutInflater.from(this).inflate(R.layout.dialog_bottom_sheet, null) as FrameLayout
     val sheet = LayoutInflater.from(this).inflate(layout, root, false)
     root.addView(sheet, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM))
     root.setOnClickListener { dialog.cancel() }
@@ -37,6 +39,31 @@ fun Activity.showBottomSheet(layout: Int, onDismiss: () -> Unit, bind: (dialog: 
         }
     }
     // The sheet reaches the bottom edge; keep its content above the navigation bar.
+    sheet.padForSystemBars(bottom = true)
+    dialog.setOnDismissListener { onDismiss() }
+    bind(dialog, sheet)
+    dialog.show()
+    return dialog
+}
+
+/**
+ * Like [showBottomSheet], but for a long list: the sheet opens at [startFraction] of the screen height, and
+ * scrolling its list up (or dragging the sheet up) grows it to full screen. Dragging down shrinks it again,
+ * then closes it. [layout] fills the full height; its list takes the space left (height 0dp, weight 1).
+ */
+fun Activity.showExpandableSheet(
+    layout: Int,
+    onDismiss: () -> Unit,
+    startFraction: Float = 0.6f,
+    bind: (dialog: Dialog, sheet: View) -> Unit,
+): Dialog {
+    val dialog = BottomSheetDialog(this, R.style.ExpandableSheetDialog)
+    val sheet = LayoutInflater.from(this).inflate(layout, null)
+    dialog.setContentView(sheet, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+    dialog.behavior.apply {
+        peekHeight = (resources.displayMetrics.heightPixels * startFraction).toInt()
+        state = BottomSheetBehavior.STATE_COLLAPSED
+    }
     sheet.padForSystemBars(bottom = true)
     dialog.setOnDismissListener { onDismiss() }
     bind(dialog, sheet)

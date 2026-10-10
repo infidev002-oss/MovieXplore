@@ -2,7 +2,6 @@ package com.movies.moviexplore.ui.onboarding
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +15,7 @@ import com.movies.moviexplore.R
 import com.movies.moviexplore.data.ContentLocale
 import com.movies.moviexplore.data.SettingsRepository
 import com.movies.moviexplore.ui.common.BaseActivity
-import com.movies.moviexplore.ui.common.dp
+import com.movies.moviexplore.ui.common.dimen
 import com.movies.moviexplore.ui.common.hideKeyboard
 import com.movies.moviexplore.ui.common.inflate
 import com.movies.moviexplore.ui.common.padForSystemBars
@@ -40,13 +39,10 @@ class OnboardingActivity : BaseActivity() {
         Tip(R.drawable.ic_play_circle, "Trailers & Where to Watch", "Open any title for trailers, cast and streaming options."),
     )
 
+    private lateinit var store: OnboardingStore
     private lateinit var pager: ViewPager2
     private lateinit var prev: Button
     private lateinit var next: Button
-
-    // The picks on the language and country pages; saved to settings on Next.
-    private lateinit var language: String
-    private lateinit var country: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,9 +51,16 @@ class OnboardingActivity : BaseActivity() {
 
         // Coming back to a page shows the earlier pick; the first time, the device's language / country.
         val settings = SettingsRepository.get(this)
-        language = savedInstanceState?.getString(KEY_LANGUAGE) ?: ContentLocale.language ?: ContentLocale.deviceLanguage()
-        country = savedInstanceState?.getString(KEY_COUNTRY)
-            ?: if (settings.countryChosen) ContentLocale.country else ContentLocale.deviceCountry()
+        val start = savedInstanceState?.getInt(KEY_PAGE) ?: intent.getIntExtra(EXTRA_PAGE, 0)
+        store = OnboardingStore(
+            settings,
+            OnboardingUiState(
+                page = start.coerceIn(0, PAGES - 1),
+                language = savedInstanceState?.getString(KEY_LANGUAGE) ?: ContentLocale.language ?: ContentLocale.deviceLanguage(),
+                country = savedInstanceState?.getString(KEY_COUNTRY)
+                    ?: if (settings.countryChosen) ContentLocale.country else ContentLocale.deviceCountry(),
+            ),
+        ).attach()
 
         prev = findViewById(R.id.onboarding_prev)
         next = findViewById(R.id.onboarding_next)
@@ -67,58 +70,50 @@ class OnboardingActivity : BaseActivity() {
         pager.isUserInputEnabled = false            // pages move on Previous / Next only
         // The page fades as it slides, so the change reads as one smooth motion.
         pager.setPageTransformer { page, position -> page.alpha = 1f - abs(position).coerceAtMost(1f) * 0.85f }
-        pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) = onPage(position)
-        })
-        val start = savedInstanceState?.getInt(KEY_PAGE) ?: intent.getIntExtra(EXTRA_PAGE, 0)
-        pager.setCurrentItem(start.coerceIn(0, PAGES - 1), false)
-        onPage(pager.currentItem)
+        pager.setCurrentItem(store.state.value.page, false)
 
-        prev.setOnClickListener { goTo(pager.currentItem - 1) }
-        next.setOnClickListener {
-            when (pager.currentItem) {
-                PAGE_LANGUAGE -> settings.setContentLanguage(language)
-                PAGE_COUNTRY -> settings.setCountry(country)
-                else -> {
-                    settings.setOnboardingDone()
-                    OnboardingFlow.finishToHome(this)
-                    return@setOnClickListener
-                }
+        prev.setOnClickListener { store.onIntent(OnboardingIntent.PreviousClicked) }
+        next.setOnClickListener { store.onIntent(OnboardingIntent.NextClicked) }
+
+        store.state.observe { render(it) }
+        store.effects.observe { effect ->
+            when (effect) {
+                OnboardingEffect.FinishToHome -> OnboardingFlow.finishToHome(this)
             }
-            goTo(pager.currentItem + 1)
         }
     }
 
-    private fun goTo(page: Int) {
-        pager.hideKeyboard()
-        pager.setCurrentItem(page.coerceIn(0, PAGES - 1), true)
-    }
-
     /** Updates everything around the page: dashes, "Step X of 3", Previous (not on the first page), Next / Start, Back. */
-    private fun onPage(page: Int) {
+    private fun render(state: OnboardingUiState) {
+        val page = state.page
+        if (pager.currentItem != page) {
+            pager.hideKeyboard()
+            pager.setCurrentItem(page, true)
+        }
         val dashes = findViewById<LinearLayout>(R.id.onboarding_steps)
-        if (dashes.childCount == 0) repeat(PAGES) { dashes.addView(View(this)) }
+        if (dashes.childCount == 0) repeat(PAGES) { dashes.addView(dashes.inflate(R.layout.item_indicator_dot)) }
+        // The current step is wider; steps reached so far are in the accent colour.
         for (i in 0 until PAGES) {
             dashes.getChildAt(i).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(if (i == page) 32 else 16), dp(4)).apply { if (i > 0) marginStart = dp(6) }
-                background = GradientDrawable().apply {
-                    cornerRadius = dp(2).toFloat()
-                    setColor(if (i <= page) getColor(R.color.primary) else 0x598C9DB0)
+                layoutParams = layoutParams.apply {
+                    width = dimen(if (i == page) R.dimen.indicator_dot_width_selected else R.dimen.indicator_dot_width)
                 }
+                setBackgroundResource(if (i <= page) R.drawable.bg_indicator_dot_on else R.drawable.bg_step_dot_off)
             }
         }
         findViewById<TextView>(R.id.onboarding_step_label).text = "Step ${page + 1} of $PAGES"
         prev.show(page > 0)
         next.text = if (page == PAGES - 1) "Start" else "Next"
         // Back steps to the previous page; on the first page it leaves the app as usual.
-        interceptBack(if (page > 0) ({ goTo(page - 1) }) else null)
+        interceptBack(if (page > 0) ({ store.onIntent(OnboardingIntent.PreviousClicked) }) else null)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putInt(KEY_PAGE, pager.currentItem)
-        outState.putString(KEY_LANGUAGE, language)
-        outState.putString(KEY_COUNTRY, country)
+        val state = store.state.value
+        outState.putInt(KEY_PAGE, state.page)
+        outState.putString(KEY_LANGUAGE, state.language)
+        outState.putString(KEY_COUNTRY, state.country)
     }
 
     /** The three pages, one view type each; all stay alive (offscreenPageLimit), so each is set up once. */
@@ -130,11 +125,15 @@ class OnboardingActivity : BaseActivity() {
             val page = when (viewType) {
                 PAGE_LANGUAGE -> parent.inflate(R.layout.page_onboarding_choice).also { view ->
                     view.setTitle("Choose Language", "Movie and TV titles and descriptions will appear in this language when available.")
-                    ChoiceList(view, ContentChoices.languages(), language, searchable = false) { language = it }
+                    ChoiceList(view, ContentChoices.languages(), store.state.value.language, searchable = false) {
+                        store.onIntent(OnboardingIntent.LanguagePicked(it))
+                    }
                 }
                 PAGE_COUNTRY -> parent.inflate(R.layout.page_onboarding_choice).also { view ->
                     view.setTitle("Choose Country", "Popular lists, releases and where to watch will match this country.")
-                    ChoiceList(view, ContentChoices.countries(), country, searchable = true) { country = it }
+                    ChoiceList(view, ContentChoices.countries(), store.state.value.country, searchable = true) {
+                        store.onIntent(OnboardingIntent.CountryPicked(it))
+                    }
                 }
                 else -> parent.inflate(R.layout.page_onboarding_tips).also { view ->
                     view.setTitle("How It Works", "Everything you need to find your next favourite.")

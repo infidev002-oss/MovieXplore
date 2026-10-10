@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="@dimen/_17sdp">
 
         <TextView
             android:id="@+id/info_title"
@@ -27,14 +27,14 @@
             layout="@layout/view_rating"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp" />
+            android:layout_marginTop="@dimen/_5sdp" />
 
         <TextView
             android:id="@+id/info_meta"
             style="@style/Text.BodyMedium.Secondary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="@dimen/_3sdp" />
 
         <!-- Justified overview text (TextViewStyler spreads each full line to the card's width). -->
         <com.movies.moviexplore.textview.TextViewStyler
@@ -42,7 +42,7 @@
             style="@style/Text.Body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="@dimen/_8sdp"
             android:ellipsize="end"
             android:visibility="gone" />
 
@@ -54,8 +54,8 @@
             android:background="@android:color/transparent"
             android:stateListAnimator="@animator/press_scale"
             android:gravity="center"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
+            android:paddingTop="@dimen/_7sdp"
+            android:paddingBottom="@dimen/_7sdp"
             android:text="Read More"
             android:textColor="@color/link"
             android:visibility="gone" />
@@ -63,7 +63,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/_13sdp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -71,18 +71,18 @@
                 android:id="@+id/info_action"
                 style="@style/Button.White"
                 android:layout_width="0dp"
-                android:layout_height="50dp"
+                android:layout_height="@dimen/_42sdp"
                 android:layout_weight="1"
                 android:drawableStart="@drawable/ic_play"
-                android:drawablePadding="6dp"
+                android:drawablePadding="@dimen/_5sdp"
                 android:drawableTint="@color/background"
-                android:textSize="16sp" />
+                android:textSize="@dimen/_13ssp" />
 
             <ImageButton
                 android:id="@+id/info_bookmark"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="12dp"
+                android:layout_width="@dimen/_42sdp"
+                android:layout_height="@dimen/_42sdp"
+                android:layout_marginStart="@dimen/_10sdp"
                 android:background="@drawable/bg_icon_button_outline"
                 android:stateListAnimator="@animator/press_scale"
                 android:contentDescription="Add to watchlist"
@@ -94,11 +94,11 @@
             android:id="@+id/info_watch_availability"
             style="@style/Button.Primary"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginTop="12dp"
+            android:layout_height="@dimen/_42sdp"
+            android:layout_marginTop="@dimen/_10sdp"
             android:background="@drawable/bg_button_outline"
             android:drawableStart="@drawable/ic_tv"
-            android:drawablePadding="8dp"
+            android:drawablePadding="@dimen/_7sdp"
             android:drawableTint="@color/text_primary"
             android:text="Watch Availability"
             android:textColor="@color/text_primary" />

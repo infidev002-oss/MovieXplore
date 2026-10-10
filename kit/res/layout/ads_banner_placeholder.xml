@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Banner loading placeholder. BannerAd sets its height to the banner's and pulses it until the ad arrives. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/ads_banner_placeholder">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:letterSpacing="0.08"
+        android:text="@string/ads_banner_placeholder"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="12sp" />
+</FrameLayout>

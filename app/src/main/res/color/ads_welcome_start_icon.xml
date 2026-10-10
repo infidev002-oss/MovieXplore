@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Welcome-back Start play icon: dark on the white pill, hidden behind the spinner while disabled. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:color="@android:color/transparent" />
+    <item android:color="@color/background" />
+</selector>

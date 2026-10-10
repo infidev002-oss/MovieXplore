@@ -10,6 +10,7 @@ import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.doOnLayout
 import com.movies.moviexplore.R
 
 /**
@@ -33,10 +34,10 @@ fun Activity.showAppToast(message: String, icon: Int = R.drawable.ic_check, abov
         toast,
         FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply {
             gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-            marginStart = dp(24)
-            marginEnd = dp(24)
+            marginStart = dimen(R.dimen.toast_side_margin)
+            marginEnd = dimen(R.dimen.toast_side_margin)
             val anchor = listOfNotNull(above, findViewById(R.id.nav_bar), findViewById(R.id.banner_root)).firstOrNull { it.isShown }
-            bottomMargin = if (anchor != null) content.bottomInWindow() - anchor.topInWindow() + dp(12) else navigationBarHeight() + dp(28)
+            bottomMargin = if (anchor != null) content.bottomInWindow() - anchor.topInWindow() + dimen(R.dimen.toast_anchor_gap) else navigationBarHeight() + dimen(R.dimen.toast_bottom_gap)
         },
     )
     toast.announceForAccessibility(message)
@@ -56,6 +57,18 @@ fun View.showAppToast(message: String, icon: Int = R.drawable.ic_check, above: V
     (ctx as? Activity)?.showAppToast(message, icon, above)
 }
 
+/** Keeps an app toast for the next screen, for a change that rebuilds the current one (e.g. `recreate()`). */
+fun queueAppToast(message: String, icon: Int = R.drawable.ic_check) {
+    AppToast.pending = message to icon
+}
+
+/** Shows the toast from [queueAppToast], if any, once this screen has laid out its tab bar / banner. */
+fun Activity.showPendingAppToast() {
+    val (message, icon) = AppToast.pending ?: return
+    AppToast.pending = null
+    findViewById<View>(android.R.id.content).doOnLayout { if (!isFinishing) showAppToast(message, icon) }
+}
+
 private fun View.topInWindow(): Int = IntArray(2).also { getLocationInWindow(it) }[1]
 
 private fun View.bottomInWindow(): Int = topInWindow() + height
@@ -63,6 +76,7 @@ private fun View.bottomInWindow(): Int = topInWindow() + height
 private object AppToast {
     const val TAG = "app_toast"
     const val SHOW_MS = 2000L
+    var pending: Pair<String, Int>? = null
 }
 
 @Suppress("DEPRECATION")

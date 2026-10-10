@@ -14,8 +14,8 @@
         android:scaleType="centerCrop" />
 
     <ImageView
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="@dimen/_30sdp"
+        android:layout_height="@dimen/_30sdp"
         android:layout_gravity="center"
         android:importantForAccessibility="no"
         android:src="@drawable/ic_play_circle" />

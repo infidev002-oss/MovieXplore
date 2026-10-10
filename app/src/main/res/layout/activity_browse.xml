@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -10,110 +11,130 @@
 
         <include layout="@layout/view_top_bar" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="16dp"
-            android:paddingTop="8dp"
-            android:paddingEnd="16dp"
-            android:paddingBottom="8dp">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="52dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_search"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingEnd="4dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_search"
-                    android:tint="@color/outline" />
-
-                <EditText
-                    android:id="@+id/search_input"
-                    style="@style/Text.Body"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1"
-                    android:background="@null"
-                    android:hint="Enter search query"
-                    android:imeOptions="actionSearch"
-                    android:importantForAutofill="no"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:textColorHint="@color/text_secondary"
-                    android:textCursorDrawable="@null" />
-
-                <ImageButton
-                    android:id="@+id/search_clear"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:background="@android:color/transparent"
-                    android:stateListAnimator="@animator/press_scale"
-                    android:contentDescription="Clear search"
-                    android:src="@drawable/ic_close"
-                    android:tint="@color/outline"
-                    android:visibility="gone" />
-            </LinearLayout>
-
-            <FrameLayout
-                android:layout_width="52dp"
-                android:layout_height="52dp"
-                android:layout_marginStart="12dp">
-
-                <ImageButton
-                    android:id="@+id/filter_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/bg_round"
-                    android:stateListAnimator="@animator/press_scale"
-                    android:contentDescription="Filters"
-                    android:src="@drawable/ic_tune" />
-
-                <View
-                    android:id="@+id/filter_badge"
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:layout_gravity="top|end"
-                    android:background="@drawable/bg_badge"
-                    android:visibility="gone" />
-            </FrameLayout>
-        </LinearLayout>
-
-        <HorizontalScrollView
-            android:id="@+id/genre_scroll"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clipToPadding="false"
-            android:paddingStart="16dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="6dp"
-            android:paddingBottom="10dp"
-            android:scrollbars="none"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:id="@+id/genre_chips"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal" />
-        </HorizontalScrollView>
-
-        <include
-            android:id="@+id/screen_grid"
-            layout="@layout/view_media_grid"
+        <!--
+            "Hide on scroll" (Material's enterAlways scroll flag): scrolling the grid up slides the search bar and
+            the genre chips away to give the posters more room; scrolling down brings them right back. snap: a
+            half-hidden header finishes sliding in or out. The CoordinatorLayout does it all; no code needed.
+        -->
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1">
+
+            <com.google.android.material.appbar.AppBarLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:stateListAnimator="@null"
+                app:liftOnScroll="false">
+
+                <!-- Search bar + filter button. -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/_13sdp"
+                    android:paddingTop="@dimen/_7sdp"
+                    android:paddingEnd="@dimen/_13sdp"
+                    android:paddingBottom="@dimen/_7sdp"
+                    app:layout_scrollFlags="scroll|enterAlways|snap">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/_43sdp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_search"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="@dimen/_13sdp"
+                        android:paddingEnd="@dimen/_3sdp">
+
+                        <ImageView
+                            android:layout_width="@dimen/_20sdp"
+                            android:layout_height="@dimen/_20sdp"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_search"
+                            android:tint="@color/outline" />
+
+                        <EditText
+                            android:id="@+id/search_input"
+                            style="@style/Text.Body"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="@dimen/_8sdp"
+                            android:layout_weight="1"
+                            android:background="@null"
+                            android:hint="Enter search query"
+                            android:imeOptions="actionSearch"
+                            android:importantForAutofill="no"
+                            android:inputType="text"
+                            android:maxLines="1"
+                            android:textColorHint="@color/text_secondary"
+                            android:textCursorDrawable="@null" />
+
+                        <ImageButton
+                            android:id="@+id/search_clear"
+                            android:layout_width="@dimen/_37sdp"
+                            android:layout_height="@dimen/_37sdp"
+                            android:background="@android:color/transparent"
+                            android:stateListAnimator="@animator/press_scale"
+                            android:contentDescription="Clear search"
+                            android:src="@drawable/ic_close"
+                            android:tint="@color/outline"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="@dimen/_43sdp"
+                        android:layout_height="@dimen/_43sdp"
+                        android:layout_marginStart="@dimen/_10sdp">
+
+                        <ImageButton
+                            android:id="@+id/filter_button"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/bg_round"
+                            android:stateListAnimator="@animator/press_scale"
+                            android:contentDescription="Filters"
+                            android:src="@drawable/ic_tune" />
+
+                        <View
+                            android:id="@+id/filter_badge"
+                            android:layout_width="@dimen/_8sdp"
+                            android:layout_height="@dimen/_8sdp"
+                            android:layout_gravity="top|end"
+                            android:background="@drawable/bg_badge"
+                            android:visibility="gone" />
+                    </FrameLayout>
+                </LinearLayout>
+
+                <!-- Genre chips. -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/genre_chips"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal"
+                    android:overScrollMode="ifContentScrolls"
+                    android:paddingStart="@dimen/_13sdp"
+                    android:paddingTop="@dimen/_8sdp"
+                    android:paddingEnd="@dimen/_5sdp"
+                    android:paddingBottom="@dimen/_8sdp"
+                    android:scrollbars="none"
+                    android:visibility="gone"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_scrollFlags="scroll|enterAlways|snap" />
+            </com.google.android.material.appbar.AppBarLayout>
+
+            <!-- The grid scrolls under the chips; its scrolling drives them (appbar_scrolling_view_behavior). -->
+            <include
+                android:id="@+id/screen_grid"
+                layout="@layout/view_media_grid"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
         <include layout="@layout/view_banner" />
     </LinearLayout>

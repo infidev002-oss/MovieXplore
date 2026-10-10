@@ -1,13 +1,15 @@
 package com.movies.moviexplore.ui.onboarding
 
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
-import android.widget.ListView
+import android.widget.TextView
+import androidx.core.widget.doAfterTextChanged
+import androidx.recyclerview.widget.RecyclerView
 import com.movies.moviexplore.R
 import com.movies.moviexplore.data.ContentLocale
 import com.movies.moviexplore.data.model.Country
+import com.movies.moviexplore.ui.common.ItemAdapter
+import com.movies.moviexplore.ui.common.scrollToTop
 import com.movies.moviexplore.ui.common.show
 import java.text.Collator
 import java.util.Locale
@@ -41,9 +43,12 @@ object ContentChoices {
     fun countryName(code: String): String = Locale.Builder().setRegion(code).build().displayCountry
 }
 
+/** A language or country choice: [badge] is a short code ("HI") or a flag; [subtitle] is optional. */
+class OnboardingOption(val code: String, val badge: String, val title: String, val subtitle: String?)
+
 /**
- * A list of choice cards (`item_onboarding_option`) in [view], with its search box (`choice_search`) shown when
- * [searchable]. [onSelect] gets the code of each card the user taps.
+ * A list of choice cards (`item_onboarding_option`) in [view]'s RecyclerView `choice_list`, with its search box
+ * (`choice_search`) shown when [searchable]. [onSelect] gets the code of each card the user taps.
  */
 class ChoiceList(
     view: View,
@@ -52,36 +57,58 @@ class ChoiceList(
     searchable: Boolean,
     private val onSelect: (String) -> Unit,
 ) {
-    private val adapter = OnboardingOptionAdapter()
+    private val list = view.findViewById<RecyclerView>(R.id.choice_list)
+    private val adapter = ItemAdapter<Pair<OnboardingOption, Boolean>>(R.layout.item_onboarding_option, key = { it.first.code }) {
+        card, (option, isSelected) -> bindCard(card, option, isSelected)
+    }
     private var shown = options
 
     init {
-        val list = view.findViewById<ListView>(R.id.choice_list)
         list.adapter = adapter
-        list.setOnItemClickListener { _, _, position, _ ->
-            selected = shown[position].code
+        if (searchable) {
+            view.findViewById<View>(R.id.choice_search).show(true)
+            view.findViewById<EditText>(R.id.choice_search_input).doAfterTextChanged { text ->
+                val q = text?.toString().orEmpty().trim()
+                shown = if (q.isEmpty()) options else options.filter {
+                    it.title.contains(q, ignoreCase = true) || it.subtitle?.contains(q, ignoreCase = true) == true
+                }
+                render { list.scrollToTop(0) }
+            }
+        }
+        // Start with the selected choice in view (e.g. a country deep in the list).
+        render {
+            shown.indexOfFirst { it.code == selected }.takeIf { it > 2 }?.let { list.scrollToTop(it - 2) }
+        }
+    }
+
+    /** Shows the [shown] options, each marked whether it is the [selected] one. */
+    private fun render(onShown: (() -> Unit)? = null) =
+        adapter.submit(shown.map { it to (it.code == selected) }, onShown)
+
+    /** The highlighted card with a check for the selected choice, a plain card with a radio otherwise. */
+    private fun bindCard(card: View, option: OnboardingOption, isSelected: Boolean) {
+        card.findViewById<View>(R.id.option_card).setBackgroundResource(
+            if (isSelected) R.drawable.bg_onboarding_option_selected else R.drawable.bg_onboarding_option
+        )
+        card.findViewById<TextView>(R.id.option_badge).apply {
+            text = option.badge
+            // A flag emoji needs more room than a two-letter code to read well.
+            textSize = if (option.badge.all { it in 'A'..'Z' }) 14f else 22f
+        }
+        card.findViewById<TextView>(R.id.option_title).text = option.title
+        card.findViewById<TextView>(R.id.option_subtitle).apply {
+            text = option.subtitle
+            show(!option.subtitle.isNullOrEmpty())
+        }
+        card.findViewById<View>(R.id.option_mark).setBackgroundResource(
+            if (isSelected) R.drawable.bg_onboarding_check else R.drawable.bg_onboarding_radio
+        )
+        card.findViewById<View>(R.id.option_check).show(isSelected)
+        card.contentDescription = listOfNotNull(option.title, option.subtitle, if (isSelected) "selected" else null).joinToString(", ")
+        card.setOnClickListener {
+            selected = option.code
             render()
             onSelect(selected)
         }
-        if (searchable) {
-            view.findViewById<View>(R.id.choice_search).show(true)
-            view.findViewById<EditText>(R.id.choice_search_input).addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
-                override fun afterTextChanged(s: Editable?) {
-                    val q = s?.toString().orEmpty().trim()
-                    shown = if (q.isEmpty()) options else options.filter {
-                        it.title.contains(q, ignoreCase = true) || it.subtitle?.contains(q, ignoreCase = true) == true
-                    }
-                    render()
-                    list.setSelection(0)
-                }
-            })
-        }
-        render()
-        // Start with the selected choice in view (e.g. a country deep in the list).
-        shown.indexOfFirst { it.code == selected }.takeIf { it > 2 }?.let { list.setSelection(it - 2) }
     }
-
-    private fun render() = adapter.submit(shown, selected)
 }

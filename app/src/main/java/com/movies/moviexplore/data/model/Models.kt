@@ -117,6 +117,7 @@ object TmdbImage {
     fun poster(path: String?) = path?.let { "${BASE}w342$it" }
     fun posterLarge(path: String?) = path?.let { "${BASE}w780$it" }
     fun backdrop(path: String?) = path?.let { "${BASE}w780$it" }
+    fun backdropLarge(path: String?) = path?.let { "${BASE}w1280$it" }
     fun profile(path: String?) = path?.let { "${BASE}w185$it" }
     fun logo(path: String?) = path?.let { "${BASE}w154$it" }
     fun still(path: String?) = path?.let { "${BASE}w300$it" }

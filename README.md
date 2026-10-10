@@ -150,6 +150,7 @@ class SplashActivity : AppCompatActivity() {
             onStatus = { status ->
                 statusText.text = if (status == SplashFlow.Status.OFFLINE) "Turn on internet" else "Please wait…"
             },
+            bannerContainer = splashBannerSlot,   // optional: empty FrameLayout, visibility="gone"
             onDone = { destination ->
                 val next = destination
                     ?: if (!Prefs.onboardingDone(this)) Intent(this, OnboardingActivity::class.java)
@@ -201,7 +202,8 @@ other way, and never add App Open ads.
 | Welcome-back screen + ad | returning to the app | automatic after `WelcomeBack.install` (section 3) |
 | Interstitial on a screen change | any navigation that should carry an ad | `AdNavigator.open(activity, intent)` instead of `startActivity(intent)` |
 | Interstitial before another action | e.g. before closing a screen | `AdNavigator.showThen(activity) { … }` |
-| Banner | home / list / details | `BannerAd.load(activity, lifecycleOwner, container, RemoteValues.BANNER_HOME / BANNER_LIST / BANNER_DETAILS, label, root)` (Fragment: `viewLifecycleOwner`) |
+| Splash banner | splash | pass `bannerContainer` to `SplashFlow.start` (section 4); the kit loads it once |
+| Banner | home / category list / details | `BannerAd.load(activity, lifecycleOwner, slot, RemoteValues.BANNER_HOME / BANNER_CAT / BANNER_INFO, root = slotRoot)` — details adds `inline = true` (Fragment: `viewLifecycleOwner`) |
 | Native | the four placements below | `NativeAds.attach(...)` (below) |
 
 **The four native placements** (exactly these; each has its own Remote Config unit):
@@ -231,10 +233,55 @@ override fun onHiddenChanged(hidden: Boolean) {          // tabs switched with h
 ```
 
 - `attach()` shows a loading placeholder, then the ad, and hides the slot when there is no ad.
-- Inside a RecyclerView row, hold the ad from `homeNative.ad` and call
-  `NativeAds.show(slot, ad, RemoteValues.NATIVE_HOME, NativeSize.MEDIUM)` in the ViewHolder.
-- Call `refreshIfNeeded` **only while the screen is visible**, never from a timer.
+- Call `refreshIfNeeded` **only while the screen is visible** (one refresh per visit), never from a timer.
+
+**Native inside a list (e.g. the category list):** put it as the first item with the kit's `NativeAdRowAdapter`:
+
+```kotlin
+private val categoryNative by lazy { NativeAds.viewModel(this, RemoteValues.NATIVE_CATEGORY) }
+private lateinit var nativeRow: NativeAdRowAdapter
+
+// onCreate
+nativeRow = NativeAdRowAdapter(this, categoryNative, RemoteValues.NATIVE_CATEGORY, NativeSize.MEDIUM)
+val grid = GridLayoutManager(this, 3).apply { spanSizeLookup = nativeRow.fullSpanLookup(3) }   // ad row = full width
+recyclerView.layoutManager = grid
+recyclerView.adapter = ConcatAdapter(nativeRow, postersAdapter)
+
+override fun onResume() { super.onResume(); nativeRow.onScreenVisible() }
+```
+
+It shows a placeholder, then the ad, removes the row when there is no ad, and refreshes once per visit — only when the
+row is on screen (scrolled away: when the user scrolls back to it). Don't put the native above the RecyclerView in a
+`NestedScrollView`: that turns off recycling and breaks paging. A native in the *middle* of a list (like Home):
+`xNative.refreshOnVisit(KEY, NativeAds.isRowVisible(recyclerView, rowPosition))` on each visit and
+`xNative.onRowVisible(KEY)` from the row's `onViewAttachedToWindow` (see `AGENTS.md` §13).
 - The size you pass is the default. Remote Config (`layout`) can change it later, and also sets the button height.
+- **Native layouts: change colors only** (text, backgrounds, border, button, "Ad" badge) in the `ads_native_*` layouts and
+  drawables and in `AdsNativeBadge` / `AdsNativeCta` (`values/ads_styles.xml`). Change nothing else.
+
+**The four banner placements** (each has its own Remote Config unit):
+
+| Screen | Constant | Type / size | Spacing (automatic) |
+|---|---|---|---|
+| Splash | `RemoteValues.BANNER_SPLASH` (loaded by `SplashFlow`) | anchored, large | 0 |
+| Home | `RemoteValues.BANNER_HOME` | anchored, standard, **collapsible** — at the **bottom**, above the navigation | 5 dp top + bottom |
+| Category list | `RemoteValues.BANNER_CAT` | anchored, standard | 5 dp top + bottom |
+| Movie / TV details | `RemoteValues.BANNER_INFO` | **inline** (pass `inline = true`), max 90 dp | 10 dp top + bottom |
+
+- The slot is an empty `FrameLayout` (`visibility="gone"`). While loading it shows a pulsing "Advertisement" placeholder
+  of the banner's height; if no ad comes it hides.
+- Per unit in Remote Config: `"inline"` (true / false) + `"maxHeight"`, `"size"` (`standard` / `large`, anchored only),
+  `"collapsible"` (true / false) and `"collapsiblePosition"` (`top` / `bottom`, must match where that banner is on screen).
+- A banner inside scrolling content (details) must be **inline**; fixed top / bottom banners are anchored. Never put an
+  anchored banner inside scrolling content.
+- **Spacing is automatic** (table above), outside Google's banner size. Never add margins around banners or natives in
+  your layouts (natives have 10 dp on every side built in).
+- **Edge-to-edge (targetSdk 35+):** keep a top banner below the status bar and a bottom banner above the navigation bar
+  by applying window insets. If a system bar covers the banner, it also takes its taps (a collapsible banner can't collapse).
+
+**Welcome-back screen: redesign `ads_welcome_back.xml`** to match your app. Keep a clickable `ads_welcome_start` (Start).
+`ads_welcome_icon`, `ads_welcome_subtitle`, `ads_welcome_progress` and `ads_welcome_hero` are optional. Use one scrollable
+layout that works in portrait and landscape (no `layout-land`; the screen handles rotation itself). Details: `AGENTS.md` §4.
 
 **Leaving the app:** right before **every** intent that opens another app (browser, share sheet, mail, Play Store,
 YouTube, system settings), call `WelcomeBack.skipNextResume()`. Put it inside your one `openUrl` / share helper, so

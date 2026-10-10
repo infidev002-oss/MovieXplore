@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One dot of a page indicator (Home hero slider, onboarding steps). Code sets the width and background
+     for the selected / passed state; the gap between dots is the container's divider. -->
+<View xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/indicator_dot_width"
+    android:layout_height="@dimen/_3sdp"
+    android:background="@drawable/bg_indicator_dot_off" />

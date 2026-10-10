@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A sideways-scrolling row; cards are added to row_items in code. -->
-<HorizontalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- A sideways-scrolling row (horizontal RecyclerView); its cards come from an ItemAdapter in code. -->
+<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clipToPadding="false"
-    android:paddingStart="16dp"
-    android:paddingEnd="4dp"
-    android:scrollbars="none">
-
-    <LinearLayout
-        android:id="@+id/row_items"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
-</HorizontalScrollView>
+    android:orientation="horizontal"
+    android:overScrollMode="ifContentScrolls"
+    android:paddingStart="@dimen/_13sdp"
+    android:paddingEnd="@dimen/_3sdp"
+    android:scrollbars="none"
+    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />

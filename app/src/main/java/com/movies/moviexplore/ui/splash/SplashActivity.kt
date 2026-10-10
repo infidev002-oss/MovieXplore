@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.movies.moviexplore.R
@@ -29,6 +30,7 @@ class SplashActivity : AppCompatActivity() {
                     SplashFlow.Status.LOADING -> "Please wait…"
                 }
             },
+            bannerContainer = findViewById<FrameLayout>(R.id.splash_banner),
             onDone = { destination ->
                 // A destination from the kit (e.g. a notification) always wins; then any unfinished onboarding step.
                 startActivity(destination ?: OnboardingFlow.nextStep(this) ?: Intent(this, MainActivity::class.java))

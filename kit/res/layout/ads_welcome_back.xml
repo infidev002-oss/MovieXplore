@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Welcome-back screen (WelcomeBackActivity). Theme colours only, so it follows the app's theme. -->
+<!-- Welcome-back screen (WelcomeBackActivity). SAMPLE design: redesign it to match your app. Required: a clickable
+     view with id ads_welcome_start. Optional: ads_welcome_icon, ads_welcome_subtitle, ads_welcome_progress, ads_welcome_hero.
+     One layout for portrait and landscape (no layout-land): keep it scrollable. -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/ads_welcome_root"

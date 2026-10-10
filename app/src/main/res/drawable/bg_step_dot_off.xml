@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Onboarding step dash: steps not reached yet (fainter than the Home dots). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <corners android:radius="@dimen/_2sdp" />
+    <solid android:color="#598C9DB0" />
+</shape>

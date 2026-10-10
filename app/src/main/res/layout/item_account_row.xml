@@ -1,35 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One Account row: its own rounded card with an icon, label and chevron. The label wraps rather than clipping. -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    One Account row: its own rounded card with an icon, label, optional value and chevron. The label wraps rather
+    than clipping. Sizes are sdp / ssp so the row keeps its proportions on every screen size.
+-->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="10dp"
+    android:layout_marginBottom="@dimen/_8sdp"
     android:background="@drawable/bg_card_row"
-    android:stateListAnimator="@animator/press_scale"
-    android:gravity="center_vertical"
-    android:minHeight="50dp"
-    android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingTop="12dp"
-    android:paddingEnd="12dp"
-    android:paddingBottom="12dp">
+    android:minHeight="@dimen/_42sdp"
+    android:paddingStart="@dimen/_13sdp"
+    android:paddingTop="@dimen/_10sdp"
+    android:paddingEnd="@dimen/_13sdp"
+    android:paddingBottom="@dimen/_10sdp"
+    android:stateListAnimator="@animator/press_scale">
 
     <ImageView
         android:id="@+id/account_row_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:importantForAccessibility="no" />
+        android:layout_width="@dimen/_20sdp"
+        android:layout_height="@dimen/_20sdp"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/account_row_label"
         style="@style/Text.Body"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="12dp"
-        android:layout_weight="1"
+        android:layout_marginStart="@dimen/_13sdp"
+        android:layout_marginEnd="@dimen/_10sdp"
         android:fontFamily="sans-serif-medium"
-        android:textSize="15sp" />
+        android:textSize="@dimen/_12ssp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/account_row_value"
+        app:layout_constraintStart_toEndOf="@id/account_row_icon"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- The row's current setting (e.g. the language), shown only on rows that have one. -->
     <TextView
@@ -37,16 +45,25 @@
         style="@style/Text.BodySmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:maxWidth="160dp"
+        android:layout_marginEnd="@dimen/_6sdp"
         android:ellipsize="end"
+        android:maxWidth="@dimen/_130sdp"
         android:maxLines="1"
         android:textColor="@color/text_secondary"
-        android:visibility="gone" />
+        android:textSize="@dimen/_10ssp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/account_row_chevron"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_goneMarginEnd="0dp" />
 
     <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:id="@+id/account_row_chevron"
+        android:layout_width="@dimen/_20sdp"
+        android:layout_height="@dimen/_20sdp"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_chevron_right" />
-</LinearLayout>
+        android:src="@drawable/ic_chevron_right"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

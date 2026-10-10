@@ -4,21 +4,21 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_app_toast"
-    android:elevation="10dp"
+    android:elevation="@dimen/_8sdp"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingStart="6dp"
-    android:paddingTop="6dp"
-    android:paddingEnd="16dp"
-    android:paddingBottom="6dp">
+    android:paddingStart="@dimen/_5sdp"
+    android:paddingTop="@dimen/_5sdp"
+    android:paddingEnd="@dimen/_13sdp"
+    android:paddingBottom="@dimen/_5sdp">
 
     <ImageView
         android:id="@+id/toast_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="@dimen/_20sdp"
+        android:layout_height="@dimen/_20sdp"
         android:background="@drawable/bg_app_toast_icon"
         android:importantForAccessibility="no"
-        android:padding="5dp"
+        android:padding="@dimen/_4sdp"
         android:tint="@android:color/white" />
 
     <TextView
@@ -26,7 +26,7 @@
         style="@style/Text.BodyMedium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="@dimen/_8sdp"
         android:ellipsize="end"
         android:fontFamily="sans-serif-medium"
         android:maxLines="2" />

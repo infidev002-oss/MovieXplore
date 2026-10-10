@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Welcome-back: fades the poster wall into the app background, so the text and Start read clearly. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <gradient
+        android:angle="270"
+        android:startColor="#590E1A26"
+        android:centerColor="#CC0E1A26"
+        android:centerY="0.55"
+        android:endColor="#FF0E1A26" />
+</shape>

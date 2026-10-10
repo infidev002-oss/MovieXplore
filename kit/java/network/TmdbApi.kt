@@ -26,6 +26,16 @@ interface TmdbApi {
         @Header("Cache-Control") cacheControl: String? = null
     ): PagedResponse
 
+    /** One genre's titles, most popular first (category list screen). */
+    @GET("discover/{media}")
+    suspend fun discover(
+        @Path("media") mediaType: String,
+        @Query("with_genres") genreId: Int,
+        @Query("page") page: Int = 1,
+        @Query("sort_by") sortBy: String = "popularity.desc",
+        @Header("Cache-Control") cacheControl: String? = null
+    ): PagedResponse
+
     @GET("{media}/{id}/recommendations")
     suspend fun recommendations(
         @Path("media") mediaType: String,

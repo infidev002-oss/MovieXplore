@@ -45,7 +45,8 @@
         <activity
             android:name=".ads.WelcomeBackActivity"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.MovieXplore.Fullscreen" />
 
         <activity
             android:name=".ui.onboarding.OnboardingActivity"

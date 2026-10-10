@@ -2,7 +2,6 @@ package com.movies.moviexplore.ui.mood
 
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -13,14 +12,12 @@ import com.movies.moviexplore.data.MediaRepository
 import com.movies.moviexplore.data.model.Media
 import com.movies.moviexplore.data.model.MediaType
 import com.movies.moviexplore.data.model.Mood
+import com.movies.moviexplore.ui.common.dimen
 import com.movies.moviexplore.ui.common.CategoryList
 import com.movies.moviexplore.ui.common.CategoryRequest
 import com.movies.moviexplore.ui.common.Navigator
 import com.movies.moviexplore.ui.common.addMediaRow
-import com.movies.moviexplore.ui.common.dp
 import com.movies.moviexplore.ui.common.inflate
-import com.movies.moviexplore.ui.common.onSystemBars
-import com.movies.moviexplore.ui.common.padForSystemBars
 import com.movies.moviexplore.ui.common.show
 import com.movies.moviexplore.ui.main.TabFragment
 import kotlinx.coroutines.launch
@@ -60,8 +57,6 @@ class MoodFragment : TabFragment(R.layout.tab_mood) {
         renderedPopular = null
         findButtonVisible = false
 
-        view.findViewById<View>(R.id.mood_header).padForSystemBars(top = true)
-        scrim.onSystemBars { bars -> scrim.layoutParams = scrim.layoutParams.apply { height = bars.top + view.dp(16) } }
         scroll.setOnScrollChangeListener { _, _, y, _, _ ->
             val target = if (y > 0) 1f else 0f
             if (scrim.alpha != target) scrim.animate().alpha(target).setDuration(150).start()
@@ -88,27 +83,23 @@ class MoodFragment : TabFragment(R.layout.tab_mood) {
         val grid: LinearLayout = view.findViewById(R.id.mood_grid)
         grid.removeAllViews()
         val columns = if (resources.configuration.screenWidthDp >= WIDE_SCREEN_DP) COLUMNS_WIDE else COLUMNS
-        Mood.entries.chunked(columns).forEachIndexed { rowIndex, moods ->
-            val row = LinearLayout(requireContext()).apply { orientation = LinearLayout.HORIZONTAL }
-            grid.addView(row, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                if (rowIndex > 0) topMargin = view.dp(8)
-            })
-            moods.forEachIndexed { index, mood ->
+        // Rows (item_mood_row) of equal tiles (item_mood_tile); the gaps are the layouts' dividers.
+        Mood.entries.chunked(columns).forEach { moods ->
+            val row = grid.inflate(R.layout.item_mood_row) as LinearLayout
+            grid.addView(row)
+            repeat(columns) { index ->
                 val tile = row.inflate(R.layout.item_mood_tile)
-                // Match the row's tallest tile, so a two-line label doesn't leave its neighbours shorter.
-                (tile.layoutParams as LinearLayout.LayoutParams).apply {
-                    height = ViewGroup.LayoutParams.MATCH_PARENT
-                    if (index > 0) marginStart = view.dp(8)
+                row.addView(tile)
+                val mood = moods.getOrNull(index)
+                if (mood == null) {
+                    // An empty place in a short last row keeps the other tiles the same width.
+                    tile.visibility = View.INVISIBLE
+                    return@repeat
                 }
                 tile.findViewById<TextView>(R.id.mood_emoji).text = mood.emoji
                 tile.findViewById<TextView>(R.id.mood_label).text = mood.label
                 tile.setOnClickListener { store.onIntent(MoodIntent.ToggleMood(mood)) }
-                row.addView(tile)
                 tiles[mood] = tile
-            }
-            // Keep a short last row's tiles the same width as the others.
-            repeat(columns - moods.size) {
-                row.addView(View(requireContext()), LinearLayout.LayoutParams(0, 0, 1f).apply { marginStart = view.dp(8) })
             }
         }
     }
@@ -161,11 +152,11 @@ class MoodFragment : TabFragment(R.layout.tab_mood) {
         findButton.animate().cancel()
         if (visible) {
             findButton.show(true)
-            findButton.translationY = root.dp(80).toFloat()
+            findButton.translationY = root.dimen(R.dimen.mood_find_slide).toFloat()
             findButton.alpha = 0f
             findButton.animate().translationY(0f).alpha(1f).setDuration(200).start()
         } else {
-            findButton.animate().translationY(root.dp(80).toFloat()).alpha(0f).setDuration(150)
+            findButton.animate().translationY(root.dimen(R.dimen.mood_find_slide).toFloat()).alpha(0f).setDuration(150)
                 .withEndAction { findButton.show(false) }.start()
         }
     }
@@ -176,7 +167,12 @@ class MoodFragment : TabFragment(R.layout.tab_mood) {
         (findButton.layoutParams as FrameLayout.LayoutParams).bottomMargin = px
         findButton.requestLayout()
         // Room for the floating button as well as the tab bar.
-        scroll.setPadding(0, 0, 0, px + root.dp(72))
+        scroll.setPadding(0, 0, 0, px + root.dimen(R.dimen.mood_find_space))
+    }
+
+    override fun applyTopSpace(view: View, px: Int) {
+        view.findViewById<View>(R.id.mood_header).padTop(px)
+        fitStatusScrim(scrim, px)
     }
 
     override fun onDestroy() {

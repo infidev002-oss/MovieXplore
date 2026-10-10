@@ -5,17 +5,18 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.ListView
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.movies.moviexplore.R
 import com.movies.moviexplore.data.model.DiscoverFilter
 import com.movies.moviexplore.data.model.FilterOptions
 import com.movies.moviexplore.data.model.Genre
 import com.movies.moviexplore.data.model.Provider
 import com.movies.moviexplore.data.model.SortOption
-import com.movies.moviexplore.ui.common.Option
-import com.movies.moviexplore.ui.common.OptionAdapter
+import com.movies.moviexplore.ui.common.ItemAdapter
+import com.movies.moviexplore.ui.common.scrollToTop
 import com.movies.moviexplore.ui.common.centerStartIcon
+import com.movies.moviexplore.ui.common.dimen
 import com.movies.moviexplore.ui.common.inflate
 import com.movies.moviexplore.ui.common.padForSystemBars
 import com.movies.moviexplore.ui.common.show
@@ -43,24 +44,34 @@ class FilterPanel(
     private val back: View = overlay.findViewById(R.id.filter_back)
     private val summary: View = overlay.findViewById(R.id.filter_summary)
     private val fields: LinearLayout = overlay.findViewById(R.id.filter_fields)
-    private val optionList: ListView = overlay.findViewById(R.id.filter_options)
+    private val optionList: RecyclerView = overlay.findViewById(R.id.filter_options)
     private val actions: View = overlay.findViewById(R.id.filter_actions)
     private val reset: View = overlay.findViewById(R.id.filter_reset)
-    private val optionAdapter = OptionAdapter()
+
+    // One `item_option` row per choice of the field being edited; the selected one is tinted and checked.
+    private val optionAdapter = ItemAdapter<FilterChoice>(R.layout.item_option, key = { it.label }) { row, choice ->
+        row.findViewById<TextView>(R.id.option_label).apply {
+            text = choice.label
+            setTextColor(context.getColor(if (choice.selected) R.color.primary else R.color.text_primary))
+        }
+        row.findViewById<View>(R.id.option_check).visibility = if (choice.selected) View.VISIBLE else View.INVISIBLE
+        row.isSelected = choice.selected
+        row.setOnClickListener { pick(choice) }
+    }
 
     private var draft = DiscoverFilter()
     private var genres: List<Genre> = emptyList()
     private var providers: List<Provider> = emptyList()
     private var isSearching = false
     private var editing: FilterField? = null
-    private var choices: List<FilterChoice> = emptyList()
 
     val isOpen: Boolean get() = overlay.visibility == View.VISIBLE
 
     init {
         panel.padForSystemBars(top = true, bottom = true)
-        panel.layoutParams = panel.layoutParams.apply {
-            width = (overlay.resources.displayMetrics.widthPixels * 0.84f).toInt()
+        // The screen handles rotation itself, so the drawer is re-sized whenever the screen width changes.
+        overlay.addOnLayoutChangeListener { _, left, _, right, _, oldLeft, _, oldRight, _ ->
+            if (right - left != oldRight - oldLeft) fitWidth(right - left)
         }
         overlay.findViewById<View>(R.id.filter_scrim).setOnClickListener { onDismiss() }
         overlay.findViewById<View>(R.id.filter_close).setOnClickListener { onDismiss() }
@@ -89,12 +100,14 @@ class FilterPanel(
             it.showAppToast("Filters reset. Tap Apply to update the list.", R.drawable.ic_refresh, above = actions)
         }
         optionList.adapter = optionAdapter
-        optionList.setOnItemClickListener { _, _, position, _ ->
-            val regionBefore = draft.region
-            draft = choices[position].apply(draft)
-            if (draft.region != regionBefore) onRegionChange(draft.region)
-            showSummary()
-        }
+    }
+
+    /** A choice was tapped: apply it to the draft and go back to the summary. */
+    private fun pick(choice: FilterChoice) {
+        val regionBefore = draft.region
+        draft = choice.apply(draft)
+        if (draft.region != regionBefore) onRegionChange(draft.region)
+        showSummary()
     }
 
     /** Opens the drawer on a fresh draft of [filter]. */
@@ -102,8 +115,11 @@ class FilterPanel(
         if (isOpen) return
         draft = filter
         showSummary()
+        // Sized before it shows: while hidden the drawer gets no layout passes, so it may be stale.
+        val width = panelWidth((overlay.parent as View).width)
+        panel.layoutParams = panel.layoutParams.apply { this.width = width }
         overlay.show(true)
-        panel.translationX = panel.layoutParams.width.toFloat()
+        panel.translationX = width.toFloat()
         panel.animate().translationX(0f).setDuration(220).start()
         onRegionChange(draft.region)
     }
@@ -111,6 +127,17 @@ class FilterPanel(
     fun close() {
         if (!isOpen) return
         panel.animate().translationX(panel.width.toFloat()).setDuration(180).withEndAction { overlay.show(false) }.start()
+    }
+
+    /** 84% of [screenWidth], capped at `filter_panel_max_width`. */
+    private fun panelWidth(screenWidth: Int): Int =
+        minOf((screenWidth * 0.84f).toInt(), overlay.dimen(R.dimen.filter_panel_max_width))
+
+    private fun fitWidth(screenWidth: Int) {
+        val width = panelWidth(screenWidth)
+        if (panel.layoutParams.width == width) return
+        // Posted: this runs inside a layout pass, which can't take new sizes.
+        panel.post { panel.layoutParams = panel.layoutParams.apply { this.width = width } }
     }
 
     /** Back inside the drawer: from a field's choices to the summary, otherwise close. */
@@ -140,7 +167,7 @@ class FilterPanel(
             fields.addView(TextView(fields.context).apply {
                 setTextAppearance(R.style.Text_BodySmall)
                 text = "While searching, filters apply to the search results. A channel clears the search (channels need the full list)."
-                setPadding(0, (12 * resources.displayMetrics.density).toInt(), 0, 0)
+                setPadding(0, dimen(R.dimen.filter_hint_top), 0, 0)
             })
         }
         FilterField.entries.forEach { field ->
@@ -159,9 +186,11 @@ class FilterPanel(
         summary.show(false)
         actions.show(false)
         optionList.show(true)
-        choices = choicesFor(field)
-        optionAdapter.submit(choices.map { Option(it.label, it.selected) })
-        optionList.setSelection(choices.indexOfFirst { it.selected }.coerceAtLeast(0))
+        val choices = choicesFor(field)
+        // Opens with the current choice at the top of the list.
+        optionAdapter.submit(choices) {
+            optionList.scrollToTop(choices.indexOfFirst { it.selected }.coerceAtLeast(0))
+        }
     }
 
     private fun valueLabel(field: FilterField): String = when (field) {

@@ -1,31 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A 3-column poster grid with a "loading more" spinner and a loading/error/empty state. -->
+<!-- A poster grid (3 columns on phones in portrait, more when wider: PagedGrid) with a "loading more" spinner and a loading/error/empty state. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <GridView
+    <!-- Columns, spacing and paging are set up by PagedGrid. -->
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/media_grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:horizontalSpacing="10dp"
-        android:listSelector="@android:color/transparent"
-        android:numColumns="3"
-        android:paddingStart="12dp"
-        android:paddingTop="4dp"
-        android:paddingEnd="12dp"
-        android:paddingBottom="24dp"
-        android:scrollbars="none"
-        android:stretchMode="columnWidth"
-        android:verticalSpacing="18dp" />
+        android:paddingStart="@dimen/_10sdp"
+        android:paddingTop="@dimen/_3sdp"
+        android:paddingEnd="@dimen/_10sdp"
+        android:paddingBottom="@dimen/_20sdp"
+        android:scrollbars="none" />
 
     <ProgressBar
         android:id="@+id/grid_loading_more"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
+        android:layout_width="@dimen/_23sdp"
+        android:layout_height="@dimen/_23sdp"
         android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/_13sdp"
         android:indeterminateTint="@color/primary"
         android:visibility="gone" />
 

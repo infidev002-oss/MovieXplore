@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.details.DetailsActivity">
 
     <ScrollView
         android:id="@+id/details_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:scrollbars="none"
-        android:visibility="gone">
+        android:scrollbars="none">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -21,15 +22,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
+                <!-- The backdrop. Its height (and the card's overlap) is set in DetailsActivity.fitHero from the width. -->
                 <FrameLayout
                     android:id="@+id/details_art_frame"
                     android:layout_width="match_parent"
-                    android:layout_height="560dp"
+                    android:layout_height="@dimen/_250sdp"
                     android:background="@color/surface_high">
 
                     <ImageView
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
+                        android:layout_width="@dimen/_47sdp"
+                        android:layout_height="@dimen/_47sdp"
                         android:layout_gravity="center"
                         android:alpha="0.6"
                         android:importantForAccessibility="no"
@@ -44,8 +46,9 @@
                         android:scaleType="centerCrop" />
 
                     <View
+                        android:id="@+id/details_art_fade"
                         android:layout_width="match_parent"
-                        android:layout_height="280dp"
+                        android:layout_height="@dimen/_125sdp"
                         android:layout_gravity="bottom"
                         android:background="@drawable/bg_gradient_bottom" />
                 </FrameLayout>
@@ -55,17 +58,23 @@
                     layout="@layout/view_info_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="400dp"
-                    android:layout_marginEnd="16dp" />
+                    android:layout_marginStart="@dimen/_13sdp"
+                    android:layout_marginTop="@dimen/_183sdp"
+                    android:layout_marginEnd="@dimen/_13sdp" />
+
+                <!-- Over the artwork's top-left corner; it scrolls away with the page. -->
+                <include layout="@layout/view_back_button" />
             </FrameLayout>
+
+            <!-- Details banner (RemoteValues.BANNER_INFO): inline adaptive, inside the scrolling content. -->
+            <include layout="@layout/view_banner" />
 
             <LinearLayout
                 android:id="@+id/details_sections"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingBottom="32dp" />
+                android:paddingBottom="@dimen/_27sdp" />
         </LinearLayout>
     </ScrollView>
 
@@ -76,15 +85,8 @@
     <View
         android:id="@+id/details_status_scrim"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="@dimen/_33sdp"
         android:alpha="0"
         android:background="@drawable/bg_status_scrim" />
 
-    <include
-        layout="@layout/view_banner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom" />
-
-    <include layout="@layout/view_back_button" />
 </FrameLayout>

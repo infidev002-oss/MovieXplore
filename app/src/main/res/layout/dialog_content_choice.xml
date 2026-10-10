@@ -1,50 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Account → Language / Country bottom sheet: title, a search box (countries only) and the same choice cards as
-    onboarding. Its height is capped in code so the list scrolls inside the sheet.
+    onboarding. Shown with showExpandableSheet: it opens part-way up and grows to full screen as the list is
+    scrolled up; the list takes the height left under the title.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="@drawable/bg_sheet"
     android:orientation="vertical"
-    android:paddingTop="20dp"
-    android:paddingBottom="8dp">
+    android:paddingTop="@dimen/_17sdp"
+    android:paddingBottom="@dimen/_7sdp">
 
     <TextView
         android:id="@+id/choice_sheet_title"
         style="@style/Text.TitleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp" />
+        android:layout_marginStart="@dimen/_17sdp" />
 
     <TextView
         android:id="@+id/choice_sheet_subtitle"
         style="@style/Text.BodySmall"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginStart="@dimen/_17sdp"
+        android:layout_marginTop="@dimen/_3sdp"
+        android:layout_marginEnd="@dimen/_17sdp"
         android:textColor="@color/text_secondary" />
 
     <LinearLayout
         android:id="@+id/choice_search"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="14dp"
-        android:layout_marginEnd="20dp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginStart="@dimen/_17sdp"
+        android:layout_marginTop="@dimen/_12sdp"
+        android:layout_marginEnd="@dimen/_17sdp"
         android:background="@drawable/bg_search"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingStart="@dimen/_13sdp"
+        android:paddingEnd="@dimen/_13sdp"
         android:visibility="gone">
 
         <ImageView
-            android:layout_width="22dp"
-            android:layout_height="22dp"
+            android:layout_width="@dimen/_18sdp"
+            android:layout_height="@dimen/_18sdp"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_search"
             android:tint="@color/outline" />
@@ -54,7 +56,7 @@
             style="@style/Text.Body"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginStart="10dp"
+            android:layout_marginStart="@dimen/_8sdp"
             android:layout_weight="1"
             android:background="@null"
             android:hint="Search country"
@@ -66,13 +68,12 @@
             android:textCursorDrawable="@null" />
     </LinearLayout>
 
-    <ListView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/choice_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:divider="@null"
-        android:dividerHeight="0dp"
-        android:listSelector="@android:color/transparent"
-        android:scrollbars="none" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="@dimen/_8sdp"
+        android:scrollbars="none"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 </LinearLayout>

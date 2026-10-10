@@ -2,6 +2,8 @@ package com.movies.moviexplore.ui.common
 
 import android.animation.AnimatorInflater
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Build
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
@@ -9,8 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
-import android.widget.AbsListView
-import android.widget.GridView
 import android.widget.TextView
 import android.widget.Toast
 import com.movies.moviexplore.R
@@ -19,8 +19,20 @@ fun Context.dp(value: Int): Int = (value * resources.displayMetrics.density).toI
 
 fun View.dp(value: Int): Int = context.dp(value)
 
+/** A size from res/values/dimens.xml (sdp based, so it scales with the screen), in pixels. */
+fun Context.dimen(id: Int): Int = resources.getDimensionPixelSize(id)
+
+fun View.dimen(id: Int): Int = context.dimen(id)
+
 fun Context.toast(message: String, long: Boolean = false) =
     Toast.makeText(this, message, if (long) Toast.LENGTH_LONG else Toast.LENGTH_SHORT).show()
+
+/** True when the active network offers internet (the same check as the splash). */
+fun Context.isOnline(): Boolean {
+    val cm = getSystemService(ConnectivityManager::class.java) ?: return false
+    val caps = cm.getNetworkCapabilities(cm.activeNetwork) ?: return false
+    return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+}
 
 fun ViewGroup.inflate(layout: Int, attach: Boolean = false): View =
     LayoutInflater.from(context).inflate(layout, this, attach)
@@ -54,8 +66,11 @@ fun View.tickHaptic() {
     )
 }
 
-/** Heights of the status bar (top) and navigation bar (bottom), in px. */
-data class SystemBars(val top: Int, val bottom: Int)
+/**
+ * Heights of the status bar (top) and navigation bar (bottom), in px. [left] / [right] are the side
+ * navigation bar and camera cutout in landscape (0 in portrait).
+ */
+data class SystemBars(val top: Int, val bottom: Int, val left: Int = 0, val right: Int = 0)
 
 /**
  * Calls [block] with the system bar sizes whenever they change. The app draws behind transparent
@@ -65,9 +80,21 @@ data class SystemBars(val top: Int, val bottom: Int)
 fun View.onSystemBars(block: (SystemBars) -> Unit) {
     setOnApplyWindowInsetsListener { _, insets ->
         val bars = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            insets.getInsets(WindowInsets.Type.systemBars()).let { SystemBars(it.top, it.bottom) }
+            val sides = insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout())
+            insets.getInsets(WindowInsets.Type.systemBars()).let { SystemBars(it.top, it.bottom, sides.left, sides.right) }
         } else {
-            SystemBars(insets.systemWindowInsetTop, insets.systemWindowInsetBottom)
+            // DisplayCutout exists from Android 9 (API 28); Android 8.x has no cutout insets.
+            var cutoutLeft = 0
+            var cutoutRight = 0
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                insets.displayCutout?.let { cutoutLeft = it.safeInsetLeft; cutoutRight = it.safeInsetRight }
+            }
+            SystemBars(
+                insets.systemWindowInsetTop,
+                insets.systemWindowInsetBottom,
+                maxOf(insets.systemWindowInsetLeft, cutoutLeft),
+                maxOf(insets.systemWindowInsetRight, cutoutRight),
+            )
         }
         block(bars)
         insets
@@ -85,23 +112,8 @@ fun View.padForSystemBars(top: Boolean = false, bottom: Boolean = false) {
 }
 
 /** Space to keep clear at the bottom of tab screens: the system navigation bar, the floating tab bar and a gap. */
-fun Context.bottomBarSpace(navigationBar: Int): Int = navigationBar + dp(FLOATING_NAV_BAR_HEIGHT_DP + 16)
+fun Context.bottomBarSpace(navigationBar: Int): Int = navigationBar + dimen(R.dimen.floating_nav_bar_space)
 
-/** The floating tab bar's height above the system navigation bar: 52dp buttons, 2×10dp padding, 12dp margin. */
-const val FLOATING_NAV_BAR_HEIGHT_DP = 84
-
-/** Calls [onNearEnd] when the user scrolls within a few items of the end of the grid. */
-fun GridView.onNearEnd(threshold: Int = 6, onScrollStart: () -> Unit = {}, onNearEnd: () -> Unit) {
-    setOnScrollListener(object : AbsListView.OnScrollListener {
-        override fun onScrollStateChanged(view: AbsListView, state: Int) {
-            if (state != AbsListView.OnScrollListener.SCROLL_STATE_IDLE) onScrollStart()
-        }
-
-        override fun onScroll(view: AbsListView, first: Int, visible: Int, total: Int) {
-            if (total > 0 && first + visible >= total - threshold) onNearEnd()
-        }
-    })
-}
 
 /**
  * A rounded pill toggle: white with dark text when selected, dark with light text otherwise.

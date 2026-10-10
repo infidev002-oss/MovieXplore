@@ -2,14 +2,16 @@ package com.movies.moviexplore.ui.profile
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Intent
+import android.graphics.Outline
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ListView
-import android.widget.ScrollView
 import android.widget.TextView
+import androidx.core.widget.NestedScrollView
+import com.google.firebase.auth.AuthCredential
 import com.movies.moviexplore.R
 import com.movies.moviexplore.ads.NativeAds
 import com.movies.moviexplore.ads.NativeSize
@@ -17,18 +19,19 @@ import com.movies.moviexplore.config.RemoteValues
 import com.movies.moviexplore.data.ContentLocale
 import com.movies.moviexplore.data.MediaRepository
 import com.movies.moviexplore.data.SettingsRepository
-import com.movies.moviexplore.ui.common.dp
+import com.movies.moviexplore.ui.common.ImageLoader
 import com.movies.moviexplore.ui.common.inflate
-import com.movies.moviexplore.ui.common.onSystemBars
+import com.movies.moviexplore.ui.common.isOnline
 import com.movies.moviexplore.ui.common.openLink
-import com.movies.moviexplore.ui.common.padForSystemBars
+import com.movies.moviexplore.ui.common.queueAppToast
 import com.movies.moviexplore.ui.common.show
-import com.movies.moviexplore.ui.common.showBottomSheet
+import com.movies.moviexplore.ui.common.showAppToast
+import com.movies.moviexplore.ui.common.showExpandableSheet
+import com.movies.moviexplore.ui.common.showPendingAppToast
 import com.movies.moviexplore.ui.common.toast
 import com.movies.moviexplore.ui.main.TabFragment
 import com.movies.moviexplore.ui.onboarding.ChoiceList
 import com.movies.moviexplore.ui.onboarding.ContentChoices
-import com.movies.moviexplore.ui.signin.SignInActivity
 import com.movies.moviexplore.ui.signin.clearGoogleCredential
 import com.movies.moviexplore.ui.signin.getGoogleCredential
 import kotlinx.coroutines.launch
@@ -37,20 +40,21 @@ import kotlinx.coroutines.launch
 class ProfileFragment : TabFragment(R.layout.tab_profile) {
 
     private lateinit var store: ProfileStore
+    private val settingsNative by lazy { NativeAds.viewModel(this, RemoteValues.NATIVE_SETTINGS) }
 
     private lateinit var root: View
-    private lateinit var scroll: ScrollView
+    private lateinit var scroll: NestedScrollView
     private lateinit var scrim: View
     private lateinit var signIn: View
+    private lateinit var googleSignIn: View
     private lateinit var user: View
     private lateinit var rows: LinearLayout
     private lateinit var content: View
 
     private var deleteDialog: AlertDialog? = null
+    private var deletingDialog: AlertDialog? = null
     private var choiceDialog: Dialog? = null
     private var renderedSignedIn: Boolean? = null
-
-    private val settingsNative by lazy { NativeAds.viewModel(this, RemoteValues.NATIVE_SETTINGS) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,31 +66,37 @@ class ProfileFragment : TabFragment(R.layout.tab_profile) {
         scroll = view.findViewById(R.id.profile_scroll)
         scrim = view.findViewById(R.id.profile_status_scrim)
         signIn = view.findViewById(R.id.profile_sign_in)
+        signIn.clipToOutline = true   // the posters follow the card's rounded corners
         user = view.findViewById(R.id.profile_user)
         rows = view.findViewById(R.id.profile_rows)
         content = view.findViewById(R.id.profile_content)
+        NativeAds.attach(viewLifecycleOwner, settingsNative, view.findViewById(R.id.profile_native), RemoteValues.NATIVE_SETTINGS, NativeSize.SMALL)
         // A new view starts without rows, so render() builds them again.
         renderedSignedIn = null
 
         val activity = requireActivity()
-        view.findViewById<View>(R.id.profile_title).padForSystemBars(top = true)
-        scrim.onSystemBars { bars -> scrim.layoutParams = scrim.layoutParams.apply { height = bars.top + view.dp(16) } }
-        scroll.setOnScrollChangeListener { _, _, y, _, _ ->
+        scroll.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { _, _, y, _, _ ->
             val target = if (y > 0) 1f else 0f
             if (scrim.alpha != target) scrim.animate().alpha(target).setDuration(150).start()
+        })
+        googleSignIn = view.findViewById(R.id.profile_google_sign_in)
+        googleSignIn.setOnClickListener { store.onIntent(ProfileIntent.SignInClicked) }
+        view.findViewById<ImageView>(R.id.profile_photo).apply {
+            outlineProvider = object : ViewOutlineProvider() {
+                override fun getOutline(view: View, outline: Outline) = outline.setOval(0, 0, view.width, view.height)
+            }
+            clipToOutline = true
         }
-        // MainActivity's Back handler returns to Home from this tab.
-        view.findViewById<View>(R.id.profile_back).setOnClickListener { activity.onBackPressedDispatcher.onBackPressed() }
-        signIn.setOnClickListener { store.onIntent(ProfileIntent.OpenSignIn) }
         view.findViewById<View>(R.id.profile_tmdb).setOnClickListener { activity.openLink("https://www.themoviedb.org") }
         scroll.addOnLayoutChangeListener { _, left, _, right, _, _, _, _, _ -> fitContentWidth(right - left) }
-        NativeAds.attach(viewLifecycleOwner, settingsNative, view.findViewById(R.id.profile_native), RemoteValues.NATIVE_SETTINGS, NativeSize.SMALL)
 
         viewScope.launch { store.state.collect { render(it) } }
         viewScope.launch { store.effects.collect { handle(it) } }
+        // The language / country confirmation queued before the rebuild.
+        activity.showPendingAppToast()
     }
 
-    // The user may have just signed in on the sign-in screen.
+    // The account may have changed while the tab was away (e.g. a deleted or expired sign-in).
     override fun onResume() {
         super.onResume()
         if (!isHidden) {
@@ -97,25 +107,40 @@ class ProfileFragment : TabFragment(R.layout.tab_profile) {
 
     override fun onHiddenChanged(hidden: Boolean) {
         super.onHiddenChanged(hidden)
-        if (!hidden) store.onIntent(ProfileIntent.Refresh)
-        if (!hidden && isResumed) settingsNative.refreshIfNeeded(RemoteValues.NATIVE_SETTINGS)
+        if (!hidden) {
+            store.onIntent(ProfileIntent.Refresh)
+            settingsNative.refreshIfNeeded(RemoteValues.NATIVE_SETTINGS)
+        }
     }
 
     private fun render(state: ProfileUiState) {
         val account = state.account
         signIn.show(account == null)
+        if (account == null) renderPosters(state.posters)
+        googleSignIn.isEnabled = !state.isSigningIn
         user.show(account != null)
-        if (account != null) root.findViewById<TextView>(R.id.profile_name).text = account.name
+        if (account != null) renderAccount(account)
         if (renderedSignedIn != (account != null)) {
             renderedSignedIn = account != null
             buildRows(signedIn = account != null)
         }
 
         if (state.confirmDelete && deleteDialog == null) {
-            deleteDialog = AlertDialog.Builder(requireActivity())
+            val activity = requireActivity()
+            deleteDialog = AlertDialog.Builder(activity)
                 .setTitle("Delete account?")
-                .setMessage("This permanently deletes your account and the watchlist saved to it, and signs you out.")
-                .setPositiveButton("Delete") { _, _ -> store.onIntent(ProfileIntent.ConfirmDelete) }
+                .setMessage(
+                    "This permanently deletes your MovieXplore account, your profile and your watchlist, " +
+                        "on this phone and in the cloud, and signs you out. This can't be undone."
+                )
+                .setPositiveButton("Delete") { _, _ ->
+                    // Offline, Firebase would wait for a connection with no end, so don't start.
+                    if (activity.isOnline()) {
+                        store.onIntent(ProfileIntent.ConfirmDelete)
+                    } else {
+                        activity.showAppToast("No internet connection. Connect and try again.", R.drawable.ic_info)
+                    }
+                }
                 .setNegativeButton("Cancel", null)
                 .setOnDismissListener {
                     deleteDialog = null
@@ -125,12 +150,59 @@ class ProfileFragment : TabFragment(R.layout.tab_profile) {
         } else if (!state.confirmDelete) {
             deleteDialog?.dismiss()
         }
+
+        // Blocks the tab (Logout, Delete again, Back) until AuthManager reports back.
+        if (state.isDeleting && deletingDialog == null) {
+            deletingDialog = deletingDialog()
+        } else if (!state.isDeleting) {
+            deletingDialog?.dismiss()
+            deletingDialog = null
+        }
     }
+
+    /** The sign-in panel's poster backdrop: one trending poster per slot. */
+    private fun renderPosters(posters: List<String>) {
+        val slots = root.findViewById<ViewGroup>(R.id.profile_sign_in_posters)
+        for (i in 0 until slots.childCount) {
+            val slot = slots.getChildAt(i) as ImageView
+            val url = posters.getOrNull(i)
+            // Re-renders happen on every visit: only load a slot when its poster changed.
+            if (url != null && slot.getTag(R.id.image_url) != url) ImageLoader.load(slot, url)
+        }
+    }
+
+    /** The top panel's user: Google photo over the name's initial, name, and email. */
+    private fun renderAccount(account: Account) {
+        root.findViewById<TextView>(R.id.profile_name).text = account.name
+        root.findViewById<TextView>(R.id.profile_email).apply {
+            text = account.email
+            show(!account.email.isNullOrBlank() && account.email != account.name)
+        }
+        root.findViewById<TextView>(R.id.profile_initial).text =
+            account.name.firstOrNull { it.isLetterOrDigit() }?.uppercase() ?: "?"
+        val photo = root.findViewById<ImageView>(R.id.profile_photo)
+        // Refresh runs on every visit: only reload when the photo actually changed.
+        if (photo.getTag(R.id.image_url) != account.photoUrl) ImageLoader.load(photo, account.photoUrl)
+        user.contentDescription = listOfNotNull("Signed in as ${account.name}", account.email).joinToString(", ")
+    }
+
+    /** "Deleting account…" with a spinner (layout: dialog_deleting.xml). */
+    private fun deletingDialog(): AlertDialog =
+        AlertDialog.Builder(requireActivity()).setView(R.layout.dialog_deleting).setCancelable(false).show()
 
     private fun handle(effect: ProfileEffect) {
         val activity = requireActivity()
         when (effect) {
-            ProfileEffect.OpenSignIn -> startActivity(Intent(activity, SignInActivity::class.java))
+            ProfileEffect.PickGoogleAccount -> viewScope.launch {
+                var credential: AuthCredential? = null
+                try {
+                    credential = getGoogleCredential(activity)
+                } finally {
+                    // Also when the view goes away mid-picker, so the button never stays disabled.
+                    store.onIntent(ProfileIntent.SignInCredential(credential))
+                }
+            }
+            is ProfileEffect.SignedIn -> activity.showAppToast("Signed in as ${effect.name}")
             ProfileEffect.ClearCredential -> {
                 val app = activity.application
                 viewScope.launch { clearGoogleCredential(app) }
@@ -139,7 +211,11 @@ class ProfileFragment : TabFragment(R.layout.tab_profile) {
                 activity.toast("Confirm your Google account to delete it")
                 store.onIntent(ProfileIntent.Reauthenticated(getGoogleCredential(activity)))
             }
-            is ProfileEffect.Message -> activity.toast(effect.text, long = true)
+            ProfileEffect.AccountDeleted -> {
+                scroll.scrollTo(0, 0)
+                activity.showAppToast("Your account has been deleted")
+            }
+            is ProfileEffect.Message -> activity.showAppToast(effect.text, R.drawable.ic_info)
         }
     }
 
@@ -177,16 +253,12 @@ class ProfileFragment : TabFragment(R.layout.tab_profile) {
     private fun openContentChoice(language: Boolean) {
         val activity = requireActivity()
         val current = if (language) ContentLocale.language ?: "en" else ContentLocale.country
-        choiceDialog = activity.showBottomSheet(R.layout.dialog_content_choice, onDismiss = { choiceDialog = null }) { dialog, sheet ->
+        choiceDialog = activity.showExpandableSheet(R.layout.dialog_content_choice, onDismiss = { choiceDialog = null }) { dialog, sheet ->
             sheet.findViewById<TextView>(R.id.choice_sheet_title).text = if (language) "Language" else "Country"
             sheet.findViewById<TextView>(R.id.choice_sheet_subtitle).text = if (language) {
                 "Movie and TV titles and descriptions appear in this language when available."
             } else {
                 "Popular lists, releases and where to watch match this country."
-            }
-            // A fixed height keeps the sheet steady while the country search narrows the list.
-            sheet.findViewById<ListView>(R.id.choice_list).apply {
-                layoutParams = layoutParams.apply { height = (resources.displayMetrics.heightPixels * 0.55f).toInt() }
             }
             val options = if (language) ContentChoices.languages() else ContentChoices.countries()
             ChoiceList(sheet, options, current, searchable = !language) { code ->
@@ -201,7 +273,12 @@ class ProfileFragment : TabFragment(R.layout.tab_profile) {
         val activity = requireActivity()
         val settings = SettingsRepository.get(activity)
         if (language) settings.setContentLanguage(code) else settings.setCountry(code)
-        activity.toast(if (language) "Language: ${ContentChoices.languageName(code)}" else "Country: ${ContentChoices.countryName(code)}")
+        // Shown by the rebuilt screen: one shown now would vanish with recreate().
+        if (language) {
+            queueAppToast("Language: ${ContentChoices.languageName(code)}", R.drawable.ic_language)
+        } else {
+            queueAppToast("Country: ${ContentChoices.countryName(code)}", R.drawable.ic_country)
+        }
         viewScope.launch {
             if (language) MediaRepository.shared.clearLanguageCache()
             // MainActivity restores this tab after the rebuild.
@@ -209,9 +286,15 @@ class ProfileFragment : TabFragment(R.layout.tab_profile) {
         }
     }
 
-    /** Keeps the column readable on tablets and in landscape: full width on phones, capped and centred beyond. */
+    /**
+     * Keeps the column readable in landscape and on wide screens: full width in portrait, capped and centred
+     * beyond. Both sizes are sdp, so the cap grows with the rest of the layout on tablets.
+     */
     private fun fitContentWidth(width: Int) {
-        val side = maxOf(root.dp(16), (width - root.dp(MAX_CONTENT_WIDTH_DP)) / 2)
+        val res = root.resources
+        val minSide = res.getDimensionPixelSize(com.intuit.sdp.R.dimen._13sdp)
+        val maxWidth = res.getDimensionPixelSize(com.intuit.sdp.R.dimen._400sdp)
+        val side = maxOf(minSide, (width - maxWidth) / 2)
         if (content.paddingStart != side) content.setPaddingRelative(side, 0, side, 0)
     }
 
@@ -227,8 +310,15 @@ class ProfileFragment : TabFragment(R.layout.tab_profile) {
         scroll.setPadding(0, 0, 0, px)
     }
 
+    override fun applyTopSpace(view: View, px: Int) {
+        view.findViewById<View>(R.id.profile_title).padTop(px)
+        fitStatusScrim(scrim, px)
+    }
+
     override fun onDestroyView() {
         deleteDialog?.dismiss()
+        deletingDialog?.dismiss()
+        deletingDialog = null
         choiceDialog?.dismiss()
         super.onDestroyView()
     }
@@ -236,9 +326,5 @@ class ProfileFragment : TabFragment(R.layout.tab_profile) {
     override fun onDestroy() {
         store.clear()
         super.onDestroy()
-    }
-
-    private companion object {
-        const val MAX_CONTENT_WIDTH_DP = 600
     }
 }

@@ -2,9 +2,9 @@
 <!-- A small emoji over the mood's name. Selected: thin accent outline, faint tint, tiny check. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="0dp"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:layout_weight="1"
-    android:minHeight="80dp"
+    android:minHeight="@dimen/_67sdp"
     android:background="@drawable/bg_tile"
     android:stateListAnimator="@animator/press_scale">
 
@@ -13,25 +13,25 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:minHeight="80dp"
-        android:paddingStart="4dp"
-        android:paddingTop="10dp"
-        android:paddingEnd="4dp"
-        android:paddingBottom="10dp">
+        android:minHeight="@dimen/_67sdp"
+        android:paddingStart="@dimen/_3sdp"
+        android:paddingTop="@dimen/_8sdp"
+        android:paddingEnd="@dimen/_3sdp"
+        android:paddingBottom="@dimen/_8sdp">
 
         <TextView
             android:id="@+id/mood_emoji"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:importantForAccessibility="no"
-            android:textSize="22sp" />
+            android:textSize="@dimen/_18ssp" />
 
         <TextView
             android:id="@+id/mood_label"
             style="@style/Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="@dimen/_3sdp"
             android:ellipsize="end"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
@@ -39,15 +39,15 @@
             android:hyphenationFrequency="normal"
             android:lineSpacingExtra="1sp"
             android:maxLines="2"
-            android:textSize="12sp" />
+            android:textSize="@dimen/_10ssp" />
     </LinearLayout>
 
     <ImageView
         android:id="@+id/mood_check"
-        android:layout_width="14dp"
-        android:layout_height="14dp"
+        android:layout_width="@dimen/_12sdp"
+        android:layout_height="@dimen/_12sdp"
         android:layout_gravity="top|end"
-        android:layout_margin="5dp"
+        android:layout_margin="@dimen/_4sdp"
         android:importantForAccessibility="no"
         android:src="@drawable/ic_check"
         android:tint="@color/primary"

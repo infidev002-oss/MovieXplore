@@ -1,190 +1,92 @@
-package com.movies.moviexplore.textview;
+package com.movies.moviexplore.textview
 
-import android.content.Context;
-import android.graphics.Canvas;
-import android.util.AttributeSet;
-import android.view.ViewGroup;
+import android.content.Context
+import android.graphics.Canvas
+import android.util.AttributeSet
+import android.view.ViewGroup
+import android.widget.TextView
+import kotlin.random.Random
 
-import android.widget.TextView;
+/**
+ * A TextView that justifies its text: every full line is widened to the view's width by sprinkling thin
+ * hair spaces between the words. The last line of each paragraph stays left-aligned. Used in XML for the
+ * overview and biography texts.
+ */
+class TextViewStyler @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = android.R.attr.textViewStyle,
+) : TextView(context, attrs, defStyleAttr) {
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+    private var lineWidth = 0
+    private var justifiedText = ""
 
-public class TextViewStyler extends TextView {
-    private static final String HAIR_SPACE = "\u200A";
-    private static final String NORMAL_SPACE = " ";
-
-    private int viewWidth;
-
-    private final List<String> lines = new ArrayList<>();
-    private final List<String> currentLine = new ArrayList<>();
-    private final List<String> workingWithSpaces = new ArrayList<>();
-
-    private String justifiedText = "";
-    private final Random random = new Random();
-
-    public TextViewStyler(Context context) {
-        super(context);
-    }
-
-    public TextViewStyler(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
-
-    public TextViewStyler(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        CharSequence src = getText();
-        if (src == null) {
-            super.onDraw(canvas);
-            return;
-        }
-
-        String raw = src.toString();
-        if (!justifiedText.equals(raw)) {
-            ViewGroup.LayoutParams params = getLayoutParams();
-            viewWidth = getMeasuredWidth() - (getPaddingLeft() + getPaddingRight());
-
-            if (params.width != ViewGroup.LayoutParams.WRAP_CONTENT && viewWidth > 0 && !raw.isEmpty()) {
-                justifiedText = justify(raw);
-                if (!justifiedText.isEmpty()) {
-                    setText(justifiedText);
-                    lines.clear();
-                    currentLine.clear();
-                } else {
-                    super.onDraw(canvas);
+    override fun onDraw(canvas: Canvas) {
+        val raw = text?.toString().orEmpty()
+        // Justify once per new text, when the width is known; setText() then redraws with the result.
+        if (raw != justifiedText && layoutParams.width != ViewGroup.LayoutParams.WRAP_CONTENT) {
+            lineWidth = measuredWidth - paddingLeft - paddingRight
+            if (lineWidth > 0 && raw.isNotEmpty()) {
+                justifiedText = justify(raw)
+                if (justifiedText.isNotEmpty()) {
+                    text = justifiedText
+                    return
                 }
+            }
+        }
+        super.onDraw(canvas)
+    }
+
+    /** Splits [text] into lines that fit; full lines are justified, a paragraph's last line is not. */
+    private fun justify(text: String): String {
+        val lines = mutableListOf<String>()
+        val line = mutableListOf<String>()
+        val tokens = text.replace("\r\n", "\n").replace("\r", "\n").replace("\n", " \n ").split(" ")
+
+        for (token in tokens) {
+            if (token.isEmpty()) continue
+            if (token == "\n") {
+                if (line.isNotEmpty()) lines += line.joinToString(SPACE)
+                line.clear()
+                lines += "\n"
+                continue
+            }
+            if (line.isEmpty() || fits((line + token).joinToString(SPACE))) {
+                line += token
             } else {
-                super.onDraw(canvas);
-            }
-        } else {
-            super.onDraw(canvas);
-        }
-    }
-
-    private String justify(String text) {
-        // Normalize and make '\n' its own token
-        String normalized = text.replace("\r\n", "\n").replace("\r", "\n").replace("\n", " \n ");
-        String[] tokens = normalized.split(" ");
-
-        for (String token : tokens) {
-            if (token.isEmpty()) continue;
-
-            if ("\n".equals(token)) {
-                if (!currentLine.isEmpty()) {
-                    lines.add(joinWords(currentLine, true)); // ragged-right for explicit breaks
-                    currentLine.clear();
-                }
-                lines.add("\n"); // paragraph separator / blank line
-                continue;
-            }
-
-            if (fitsInLine(token, currentLine, true)) {
-                currentLine.add(token);
-            } else {
-                if (!currentLine.isEmpty()) {
-                    lines.add(justifyLine(currentLine));
-                    currentLine.clear();
-                }
-                currentLine.add(token);
+                lines += justifyLine(line)
+                line.clear()
+                line += token
             }
         }
+        if (line.isNotEmpty()) lines += line.joinToString(SPACE)
 
-        if (!currentLine.isEmpty()) {
-            lines.add(joinWords(currentLine, true)); // last line is ragged-right
-            currentLine.clear();
-        }
-
-        StringBuilder out = new StringBuilder();
-        for (int i = 0; i < lines.size(); i++) {
-            String ln = lines.get(i);
-            if ("\n".equals(ln)) {
-                out.append("\n");
-            } else {
-                out.append(ln);
-                if (i + 1 < lines.size() && !"\n".equals(lines.get(i + 1))) {
-                    out.append("\n");
-                }
+        return buildString {
+            lines.forEachIndexed { i, current ->
+                append(current)
+                if (current != "\n" && i + 1 < lines.size && lines[i + 1] != "\n") append("\n")
             }
         }
-        return out.toString();
     }
 
-    private String joinWords(List<String> words, boolean spacesBetween) {
-        if (words.isEmpty()) return "";
-        if (!spacesBetween) {
-            StringBuilder sb = new StringBuilder();
-            for (String w : words) sb.append(w);
-            return sb.toString();
+    /** Adds hair spaces at random gaps between the words until one more wouldn't fit. */
+    private fun justifyLine(words: List<String>): String {
+        if (words.size <= 1) return words.joinToString(SPACE)
+        val parts = mutableListOf<String>()
+        words.forEachIndexed { i, word ->
+            parts += word
+            if (i < words.size - 1) parts += SPACE
         }
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < words.size(); i++) {
-            sb.append(words.get(i));
-            if (i < words.size() - 1) sb.append(NORMAL_SPACE);
+        while (fits(parts.joinToString("") + HAIR_SPACE)) {
+            parts.add(Random.nextInt(1, maxOf(2, parts.size - 1)), HAIR_SPACE)
         }
-        return sb.toString();
+        return parts.joinToString("")
     }
 
-    private String justifyLine(List<String> words) {
-        workingWithSpaces.clear();
+    private fun fits(candidate: String) = paint.measureText(candidate) <= lineWidth
 
-        if (words.size() <= 1) {
-            return joinWords(words, true);
-        }
-
-        // seed as [word, SPACE, word, SPACE, ...]
-        for (int i = 0; i < words.size(); i++) {
-            workingWithSpaces.add(words.get(i));
-            if (i < words.size() - 1) {
-                workingWithSpaces.add(NORMAL_SPACE);
-            }
-        }
-
-        // Use renamed helper to avoid signature clash
-        while (fitsWithExtra(HAIR_SPACE, workingWithSpaces, false)) {
-            int insertAt = getRandomBetween(1, Math.max(1, workingWithSpaces.size() - 1));
-            workingWithSpaces.add(insertAt, HAIR_SPACE);
-        }
-
-        return joinWords(workingWithSpaces, false);
-    }
-
-    /**
-     * Will the 'word' fit if added as the next token to 'line'?
-     * When spacesBetween=true, we simulate a single space BETWEEN words only (no trailing).
-     */
-    private boolean fitsInLine(String word, List<String> line, boolean spacesBetween) {
-        String base = joinWords(line, spacesBetween);
-        String candidate;
-        if (base.isEmpty()) {
-            candidate = word;
-        } else if (spacesBetween) {
-            candidate = base + NORMAL_SPACE + word;
-        } else {
-            candidate = base + word;
-        }
-        float w = getPaint().measureText(candidate);
-        return w <= viewWidth; // <= avoids premature wrap
-    }
-
-    /**
-     * Will 'extra' still fit if appended to an already composed line (which may already contain spaces)?
-     * This is used when sprinkling HAIR_SPACE.
-     */
-    private boolean fitsWithExtra(String extra, List<String> composed, boolean composedHasBetweenSpaces) {
-        String base = joinWords(composed, composedHasBetweenSpaces);
-        String candidate = base + extra;
-        float w = getPaint().measureText(candidate);
-        return w <= viewWidth;
-    }
-
-    private int getRandomBetween(int inclusiveMin, int exclusiveMax) {
-        if (exclusiveMax <= inclusiveMin) return inclusiveMin;
-        return inclusiveMin + random.nextInt(exclusiveMax - inclusiveMin);
+    private companion object {
+        const val SPACE = " "
+        const val HAIR_SPACE = " "
     }
 }
-

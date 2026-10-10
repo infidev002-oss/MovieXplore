@@ -16,16 +16,18 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="20dp"
-        android:paddingTop="20dp"
-        android:paddingEnd="20dp">
+        android:paddingStart="@dimen/_17sdp"
+        android:paddingTop="@dimen/_17sdp"
+        android:paddingEnd="@dimen/_17sdp">
 
         <LinearLayout
             android:id="@+id/onboarding_steps"
             android:layout_width="0dp"
-            android:layout_height="4dp"
+            android:layout_height="@dimen/_3sdp"
             android:layout_weight="1"
-            android:orientation="horizontal" />
+            android:divider="@drawable/space_indicator_gap"
+            android:orientation="horizontal"
+            android:showDividers="middle" />
 
         <TextView
             android:id="@+id/onboarding_step_label"

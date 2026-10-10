@@ -8,21 +8,21 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingStart="20dp"
-    android:paddingTop="8dp"
-    android:paddingEnd="20dp"
-    android:paddingBottom="12dp">
+    android:paddingStart="@dimen/_17sdp"
+    android:paddingTop="@dimen/_7sdp"
+    android:paddingEnd="@dimen/_17sdp"
+    android:paddingBottom="@dimen/_10sdp">
 
     <Button
         android:id="@+id/onboarding_prev"
         style="@style/Button.Outline"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:minWidth="96dp"
-        android:paddingStart="18dp"
-        android:paddingEnd="18dp"
+        android:layout_height="@dimen/_33sdp"
+        android:minWidth="@dimen/_80sdp"
+        android:paddingStart="@dimen/_15sdp"
+        android:paddingEnd="@dimen/_15sdp"
         android:text="Previous"
-        android:textSize="14sp" />
+        android:textSize="@dimen/_12ssp" />
 
     <Space
         android:layout_width="0dp"
@@ -33,10 +33,10 @@
         android:id="@+id/onboarding_next"
         style="@style/Button.White"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:minWidth="96dp"
-        android:paddingStart="18dp"
-        android:paddingEnd="18dp"
+        android:layout_height="@dimen/_33sdp"
+        android:minWidth="@dimen/_80sdp"
+        android:paddingStart="@dimen/_15sdp"
+        android:paddingEnd="@dimen/_15sdp"
         android:text="Next"
-        android:textSize="14sp" />
+        android:textSize="@dimen/_12ssp" />
 </LinearLayout>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Account sign-in panel: fades the movie posters behind it into the card colour, so the text below stays readable. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <gradient
+        android:angle="270"
+        android:centerColor="#E0182A3B"
+        android:centerY="0.5"
+        android:endColor="@color/surface"
+        android:startColor="#1A182A3B"
+        android:type="linear" />
+</shape>

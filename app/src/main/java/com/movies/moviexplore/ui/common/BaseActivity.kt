@@ -3,6 +3,7 @@ package com.movies.moviexplore.ui.common
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
 import com.movies.moviexplore.mvi.MviStore
@@ -71,6 +72,28 @@ abstract class BaseActivity : FragmentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             // Keep the navigation bar fully transparent instead of adding a grey scrim.
             window.isNavigationBarContrastEnforced = false
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            // Draw under the camera cutout too, so landscape has no black strip on the cutout side.
+            window.attributes = window.attributes.apply {
+                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
+        }
+        if (padsSides) keepClearOfSideBars()
+    }
+
+    /**
+     * True: the whole content is padded clear of the side navigation bar and camera cutout (landscape).
+     * A screen with edge-to-edge artwork sets false and pads only its own text and controls ([SystemBars.left] / right).
+     */
+    protected open val padsSides: Boolean = true
+
+    private fun keepClearOfSideBars() {
+        findViewById<View>(android.R.id.content).onSystemBars { bars ->
+            val content = findViewById<View>(android.R.id.content)
+            if (content.paddingLeft != bars.left || content.paddingRight != bars.right) {
+                content.setPadding(bars.left, content.paddingTop, bars.right, content.paddingBottom)
+            }
         }
     }
 }

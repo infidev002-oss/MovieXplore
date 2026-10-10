@@ -2,6 +2,7 @@ package com.movies.moviexplore.ads
 
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.graphics.Rect
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -15,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.ads.nativead.MediaView
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdView
@@ -141,6 +143,23 @@ object NativeAds {
         container.setTag(R.id.ads_native_slot_ad, PLACEHOLDER)
         container.setTag(R.id.ads_native_slot_size, size)
         container.visibility = View.VISIBLE
+    }
+
+    /**
+     * For a native row in the middle of a list (e.g. Home): is the row at [position] on screen right now?
+     * Pass it to NativeAdViewModel.refreshOnVisit(key, …) on each visit, and call onRowVisible(key) from the
+     * row's onViewAttachedToWindow. (For "native as the first item" use NativeAdRowAdapter instead.)
+     */
+    fun isRowVisible(recyclerView: RecyclerView, position: Int): Boolean {
+        if (position < 0) return false
+        val view = recyclerView.layoutManager?.findViewByPosition(position) ?: return false
+        return isOnScreen(view)
+    }
+
+    internal fun isOnScreen(view: View): Boolean {
+        if (!view.isShown || !view.isAttachedToWindow) return false
+        val rect = Rect()
+        return view.getGlobalVisibleRect(rect) && rect.height() > 0
     }
 
     fun hide(container: FrameLayout) {

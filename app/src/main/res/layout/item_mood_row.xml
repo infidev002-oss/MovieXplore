@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One row of the Mood grid: equal-width tiles (item_mood_tile, weight 1) with a gap between them. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:divider="@drawable/space_mood_gap"
+    android:orientation="horizontal"
+    android:showDividers="middle" />

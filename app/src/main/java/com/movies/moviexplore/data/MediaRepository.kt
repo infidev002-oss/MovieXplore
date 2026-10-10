@@ -1,5 +1,6 @@
 package com.movies.moviexplore.data
 
+import android.util.LruCache
 import com.movies.moviexplore.data.model.Country
 import com.movies.moviexplore.data.model.Credit
 import com.movies.moviexplore.data.model.DiscoverFilter
@@ -49,6 +50,9 @@ class MediaRepository(private val api: TmdbApi) {
     private val genreMutex = Mutex()
     private var countriesCache: List<Country>? = null
     private val countriesMutex = Mutex()
+    // In memory only, for this app session: titles are in the content language, so [clearLanguageCache] empties them.
+    private val seasonCache = LruCache<Int, List<SeasonInfo>>(30)
+    private val episodeCache = LruCache<String, List<Episode>>(60)
 
     suspend fun genres(type: MediaType): List<Genre> = io {
         genreMutex.withLock {
@@ -59,8 +63,12 @@ class MediaRepository(private val api: TmdbApi) {
         }
     }
 
-    /** Forgets the genre names, which TMDB returns in the content language, after the user picks another one. */
-    suspend fun clearLanguageCache() = genreMutex.withLock { genreCache.clear() }
+    /** Forgets genre names, seasons and episodes, which TMDB returns in the content language, after the user picks another one. */
+    suspend fun clearLanguageCache() {
+        genreMutex.withLock { genreCache.clear() }
+        seasonCache.evictAll()
+        episodeCache.evictAll()
+    }
 
     suspend fun trending(type: MediaType?, page: Int = 1): PageResult = io {
         api.trending(type?.path ?: "all", if (type == null) "day" else "week", page).json().toPage(type)
@@ -159,7 +167,9 @@ class MediaRepository(private val api: TmdbApi) {
         val creators = dto.array("created_by").objects().map { Credit(it.getInt("id"), it.optString("name"), "Creator", it.str("profile_path")) } +
             credits?.array("crew")?.objects().orEmpty().keyCrew("Director")
         val cast = credits?.array("cast")?.objects().orEmpty().take(20).map { it.asCast() }
-        val seasons = dto.array("seasons").objects().map { it.asSeason() }
+        val seasons = dto.array("seasons").objects().map { it.asSeason() }.let { all -> all.filter { it.number > 0 }.ifEmpty { all } }
+        // The season screen reuses this list instead of downloading the show again.
+        if (type == MediaType.TV) seasonCache.put(id, seasons)
         MediaDetails(
             media = media,
             genres = genreNames,
@@ -167,17 +177,19 @@ class MediaRepository(private val api: TmdbApi) {
                 ?: dto.array("production_countries").objects().firstOrNull()?.str("iso_3166_1"),
             videos = dto.optJSONObject("videos")?.array("results")?.objects().orEmpty().toTrailers(),
             credits = (cast + creators).distinctBy { it.id },
-            seasons = seasons.filter { it.number > 0 }.ifEmpty { seasons },
+            seasons = seasons,
             similar = dto.optJSONObject("similar")?.array("results")?.objects().orEmpty().toMedia(type),
         )
     }
 
-    suspend fun seasons(tvId: Int): List<SeasonInfo> = io {
+    /** A show's seasons; downloaded once, or already known from [details]. */
+    suspend fun seasons(tvId: Int): List<SeasonInfo> = seasonCache.get(tvId) ?: io {
         val seasons = api.details(MediaType.TV.path, tvId).json().array("seasons").objects().map { it.asSeason() }
-        seasons.filter { it.number > 0 }.ifEmpty { seasons }
+        seasons.filter { it.number > 0 }.ifEmpty { seasons }.also { seasonCache.put(tvId, it) }
     }
 
-    suspend fun episodes(tvId: Int, season: Int): List<Episode> = io {
+    /** A season's episodes, downloaded once per season; switching back to a season shows them from memory. */
+    suspend fun episodes(tvId: Int, season: Int): List<Episode> = cachedEpisodes(tvId, season) ?: io {
         api.season(tvId, season).json().array("episodes").objects().map {
             Episode(
                 id = it.getInt("id"),
@@ -187,8 +199,13 @@ class MediaRepository(private val api: TmdbApi) {
                 runtime = it.intOrNull("runtime"),
                 airDate = it.str("air_date"),
             )
-        }
+        }.also { episodeCache.put(episodeKey(tvId, season), it) }
     }
+
+    /** Episodes already downloaded for this season, or null; lets a screen show them without a loading state. */
+    fun cachedEpisodes(tvId: Int, season: Int): List<Episode>? = episodeCache.get(episodeKey(tvId, season))
+
+    private fun episodeKey(tvId: Int, season: Int) = "${tvId}_$season"
 
     suspend fun episode(tvId: Int, season: Int, episode: Int): EpisodeDetails = io {
         val dto = api.episode(tvId, season, episode).json()

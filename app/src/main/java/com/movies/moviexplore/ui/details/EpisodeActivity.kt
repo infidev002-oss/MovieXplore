@@ -6,18 +6,16 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import com.movies.moviexplore.R
-import com.movies.moviexplore.config.RemoteValues
 import com.movies.moviexplore.data.MediaRepository
 import com.movies.moviexplore.data.model.EpisodeDetails
 import com.movies.moviexplore.data.model.TmdbImage
+import com.movies.moviexplore.ui.common.dimen
 import com.movies.moviexplore.ui.common.BaseActivity
-import com.movies.moviexplore.ui.common.bindBanner
 import com.movies.moviexplore.ui.common.ImageLoader
 import com.movies.moviexplore.ui.common.Navigator
 import com.movies.moviexplore.ui.common.addCreditsRow
 import com.movies.moviexplore.ui.common.addTrailersRow
 import com.movies.moviexplore.ui.common.bindRating
-import com.movies.moviexplore.ui.common.dp
 import com.movies.moviexplore.ui.common.formatDate
 import com.movies.moviexplore.ui.common.formatRuntime
 import com.movies.moviexplore.ui.common.makeExpandable
@@ -36,7 +34,6 @@ class EpisodeActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_episode)
-        bindBanner(this, RemoteValues.BANNER_DETAILS, findViewById(R.id.banner_root), content = findViewById(R.id.episode_scroll))
         val showName = intent.getStringExtra(Navigator.EXTRA_TITLE).orEmpty()
         val backdropPath = intent.getStringExtra(Navigator.EXTRA_BACKDROP)
         val store = EpisodeStore(
@@ -52,10 +49,10 @@ class EpisodeActivity : BaseActivity() {
         }
         val scroll = findViewById<ScrollView>(R.id.episode_scroll)
         val scrim = findViewById<View>(R.id.episode_status_scrim)
-        scrim.onSystemBars { bars -> scrim.layoutParams = scrim.layoutParams.apply { height = bars.top + dp(16) } }
+        scrim.onSystemBars { bars -> scrim.layoutParams = scrim.layoutParams.apply { height = bars.top + dimen(R.dimen.status_scrim_extra) } }
         scroll.onSystemBars { bars -> scroll.setPadding(0, 0, 0, bars.bottom) }
+        val art = findViewById<View>(R.id.episode_art_frame)
         scroll.setOnScrollChangeListener { _, _, y, _, _ ->
-            val art = findViewById<View>(R.id.episode_art_frame)
             val target = if (y > art.height - scrim.height) 1f else 0f
             if (scrim.alpha != target) scrim.animate().alpha(target).setDuration(150).start()
         }

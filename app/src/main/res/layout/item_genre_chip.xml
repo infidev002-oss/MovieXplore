@@ -3,7 +3,7 @@
     style="@style/Text.Body"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:paddingStart="20dp"
-    android:paddingTop="10dp"
-    android:paddingEnd="20dp"
-    android:paddingBottom="10dp" />
+    android:paddingStart="@dimen/_17sdp"
+    android:paddingTop="@dimen/_8sdp"
+    android:paddingEnd="@dimen/_17sdp"
+    android:paddingBottom="@dimen/_8sdp" />

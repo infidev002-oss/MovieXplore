@@ -2,9 +2,9 @@
 <!-- Round back button floating over artwork; the status bar height is added in code. -->
 <ImageButton xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/floating_back"
-    android:layout_width="42dp"
-    android:layout_height="42dp"
-    android:layout_margin="12dp"
+    android:layout_width="@dimen/_35sdp"
+    android:layout_height="@dimen/_35sdp"
+    android:layout_margin="@dimen/_10sdp"
     android:background="@drawable/bg_round"
     android:stateListAnimator="@animator/press_scale"
     android:contentDescription="Back"

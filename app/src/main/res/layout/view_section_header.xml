@@ -8,16 +8,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
-    android:minHeight="52dp"
+    android:minHeight="@dimen/_43sdp"
     android:orientation="horizontal"
-    android:paddingStart="16dp"
-    android:paddingTop="14dp"
-    android:paddingEnd="16dp"
-    android:paddingBottom="12dp">
+    android:paddingStart="@dimen/_13sdp"
+    android:paddingTop="@dimen/_12sdp"
+    android:paddingEnd="@dimen/_13sdp"
+    android:paddingBottom="@dimen/_10sdp">
 
     <View
-        android:layout_width="4dp"
-        android:layout_height="22dp"
+        android:layout_width="@dimen/_3sdp"
+        android:layout_height="@dimen/_18sdp"
         android:background="@drawable/bg_section_accent" />
 
     <TextView
@@ -25,13 +25,13 @@
         style="@style/Text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
+        android:layout_marginStart="@dimen/_8sdp"
         android:layout_weight="1"
         android:accessibilityHeading="true"
         android:ellipsize="end"
         android:letterSpacing="-0.01"
         android:maxLines="1"
-        android:textSize="22sp"
+        android:textSize="@dimen/_18ssp"
         android:textStyle="bold" />
 
     <TextView
@@ -41,17 +41,17 @@
         android:layout_height="wrap_content"
         android:background="@drawable/bg_see_all"
         android:drawableEnd="@drawable/ic_chevron_right_small"
-        android:drawablePadding="2dp"
+        android:drawablePadding="@dimen/_2sdp"
         android:duplicateParentState="true"
         android:gravity="center_vertical"
         android:importantForAccessibility="no"
-        android:paddingStart="12dp"
-        android:paddingTop="5dp"
-        android:paddingEnd="6dp"
-        android:paddingBottom="5dp"
+        android:paddingStart="@dimen/_10sdp"
+        android:paddingTop="@dimen/_4sdp"
+        android:paddingEnd="@dimen/_5sdp"
+        android:paddingBottom="@dimen/_4sdp"
         android:stateListAnimator="@animator/press_scale"
         android:text="See all"
         android:textColor="@color/text_secondary"
-        android:textSize="13sp"
+        android:textSize="@dimen/_11ssp"
         android:visibility="gone" />
 </LinearLayout>

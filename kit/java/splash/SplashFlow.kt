@@ -10,6 +10,7 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.SystemClock
 import android.util.Log
+import android.widget.FrameLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -18,6 +19,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import your.app.ads.AdNavigator
 import your.app.ads.AdsConsent
+import your.app.ads.BannerAd
 import your.app.ads.SplashInterstitial
 import your.app.auth.AuthManager
 import your.app.config.RemoteValues
@@ -46,6 +48,7 @@ import kotlin.time.Duration.Companion.milliseconds
  *           setContentView(…)
  *           flow.start(
  *               onStatus = { status -> /* OFFLINE: "turn on internet" · LOADING: "please wait" */ },
+ *               bannerContainer = binding.splashBanner,      // optional splash banner slot
  *               onDone = { destination -> startActivity(destination ?: Intent(this, HomeActivity::class.java)); finish() }
  *           )
  *       }
@@ -79,7 +82,15 @@ class SplashFlow(private val activity: AppCompatActivity) {
         })
     }
 
-    fun start(onStatus: (Status) -> Unit = {}, onDone: (destination: Intent?) -> Unit) {
+    /**
+     * @param bannerContainer optional splash banner slot (an empty FrameLayout, visibility="gone"). The kit loads
+     *        RemoteValues.BANNER_SPLASH into it once, right after consent; no reload on the splash.
+     */
+    fun start(
+        onStatus: (Status) -> Unit = {},
+        bannerContainer: FrameLayout? = null,
+        onDone: (destination: Intent?) -> Unit
+    ) {
         if (started) return
         started = true
         activity.lifecycleScope.launch {
@@ -92,6 +103,12 @@ class SplashFlow(private val activity: AppCompatActivity) {
 
             val prepared = prepare(activity)                 // Remote Config, then Startup hook (shared)
             val consent = async { gatherConsent() }
+            if (bannerContainer != null) launch {
+                consent.await()                                // Mobile Ads is initialised after consent
+                if (!activity.isFinishing && !activity.isDestroyed) {
+                    BannerAd.load(activity, activity, bannerContainer, RemoteValues.BANNER_SPLASH)
+                }
+            }
             val permission = async { requestNotificationPermission() }
             val destination = prepared.await()
             log("startup done, destination=${destination?.component?.shortClassName}")

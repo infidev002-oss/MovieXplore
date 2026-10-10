@@ -58,6 +58,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.fragment)
     implementation(libs.material)
+    implementation(libs.constraintlayout)
+    implementation(libs.sdp); implementation(libs.ssp)                       // responsive dimensions
     implementation(libs.viewpager2)                                           // onboarding pages
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.lifecycle.viewmodel.ktx)

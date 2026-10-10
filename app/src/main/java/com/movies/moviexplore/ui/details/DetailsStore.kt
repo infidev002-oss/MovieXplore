@@ -126,6 +126,11 @@ class DetailsStore(
 
     private fun selectSeason(number: Int) {
         episodesJob?.cancel()
+        // A season seen before shows at once, without a loader or a second request.
+        repository.cachedEpisodes(id, number)?.let { cached ->
+            reduce { copy(selectedSeason = number, episodes = cached, episodesLoading = false) }
+            return
+        }
         reduce { copy(selectedSeason = number, episodes = emptyList(), episodesLoading = true) }
         episodesJob = scope.launch {
             val episodes = safeCall { repository.episodes(id, number) }.getOrDefault(emptyList())

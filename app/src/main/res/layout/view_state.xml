@@ -8,8 +8,8 @@
 
     <ProgressBar
         android:id="@+id/state_progress"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="@dimen/_40sdp"
         android:layout_gravity="center"
         android:indeterminateTint="@color/primary" />
 
@@ -20,7 +20,7 @@
         android:layout_gravity="center"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="32dp">
+        android:padding="@dimen/_27sdp">
 
         <TextView
             android:id="@+id/state_message"
@@ -33,8 +33,8 @@
         <Button
             android:id="@+id/state_retry"
             style="@style/Button.Primary"
-            android:layout_width="160dp"
-            android:layout_marginTop="16dp"
+            android:layout_width="@dimen/_133sdp"
+            android:layout_marginTop="@dimen/_13sdp"
             android:text="Retry" />
     </LinearLayout>
 </FrameLayout>

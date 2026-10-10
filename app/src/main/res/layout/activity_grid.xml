@@ -12,10 +12,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingTop="8dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="8dp"
+        android:paddingStart="@dimen/_13sdp"
+        android:paddingTop="@dimen/_7sdp"
+        android:paddingEnd="@dimen/_13sdp"
+        android:paddingBottom="@dimen/_7sdp"
         android:visibility="gone">
 
         <TextView
@@ -23,10 +23,10 @@
             style="@style/Text.Body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="20dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="10dp"
+            android:paddingStart="@dimen/_17sdp"
+            android:paddingTop="@dimen/_8sdp"
+            android:paddingEnd="@dimen/_17sdp"
+            android:paddingBottom="@dimen/_8sdp"
             android:text="Movies" />
 
         <TextView
@@ -34,23 +34,13 @@
             style="@style/Text.Body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:paddingStart="20dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="10dp"
+            android:layout_marginStart="@dimen/_10sdp"
+            android:paddingStart="@dimen/_17sdp"
+            android:paddingTop="@dimen/_8sdp"
+            android:paddingEnd="@dimen/_17sdp"
+            android:paddingBottom="@dimen/_8sdp"
             android:text="TV Shows" />
     </LinearLayout>
-
-    <!-- Native ad on a genre's list only (kit NativeAds, RemoteValues.NATIVE_CATEGORY); shown by NativeAds.attach. -->
-    <FrameLayout
-        android:id="@+id/grid_native"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:visibility="gone" />
 
     <include
         android:id="@+id/screen_grid"

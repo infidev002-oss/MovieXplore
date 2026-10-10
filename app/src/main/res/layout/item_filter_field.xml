@@ -9,8 +9,8 @@
         style="@style/Text.TitleMedium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="10dp" />
+        android:layout_marginTop="@dimen/_17sdp"
+        android:layout_marginBottom="@dimen/_8sdp" />
 
     <LinearLayout
         android:id="@+id/field_row"
@@ -20,7 +20,7 @@
         android:stateListAnimator="@animator/press_scale"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="@dimen/_13sdp">
 
         <TextView
             android:id="@+id/field_value"
@@ -30,8 +30,8 @@
             android:layout_weight="1" />
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/_20sdp"
+            android:layout_height="@dimen/_20sdp"
             android:importantForAccessibility="no"
             android:src="@drawable/ic_chevron_right" />
     </LinearLayout>

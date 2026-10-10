@@ -19,8 +19,9 @@ import com.movies.moviexplore.R
  * behind it, under a light tint. Older versions keep the panel's solid background from XML.
  *
  * Plain Android has no "blur what's behind this view", so a hidden layer copies the area behind the
- * panel into a small bitmap each frame (a quarter size, so it's cheap) and blurs it on the GPU with
- * RenderEffect. While copying, glass panels skip drawing themselves, so a panel never captures itself.
+ * panel into a small bitmap whenever the screen redraws (a quarter size, so it's cheap) and blurs it on
+ * the GPU with RenderEffect. The blur is redrawn only when that copy changed, so a still screen stays idle.
+ * While copying, glass panels skip drawing themselves, so a panel never captures itself.
  */
 class GlassFrameLayout @JvmOverloads constructor(
     context: Context,
@@ -67,6 +68,7 @@ class GlassFrameLayout @JvmOverloads constructor(
     private class BackdropBlurView(context: Context, private val panel: View, private val source: View) : View(context) {
 
         private var bitmap: Bitmap? = null
+        private var scratch: Bitmap? = null   // the next copy; swapped in only when it differs from [bitmap]
         private val paint = Paint(Paint.FILTER_BITMAP_FLAG)
         private val destination = Rect()
         private val panelLocation = IntArray(2)
@@ -97,15 +99,21 @@ class GlassFrameLayout @JvmOverloads constructor(
             viewTreeObserver.removeOnPreDrawListener(onPreDraw)
             bitmap?.recycle()
             bitmap = null
+            scratch?.recycle()
+            scratch = null
             super.onDetachedFromWindow()
         }
 
-        /** Copies the part of [source] behind this view into a small bitmap. */
+        /**
+         * Copies the part of [source] behind this view into a small bitmap, and redraws the blur only when
+         * that copy changed. Redrawing every time would ask for a new frame every frame, so the screen would
+         * never rest and scrolling would stutter.
+         */
         private fun capture() {
             val w = (width / DOWNSCALE).coerceAtLeast(1)
             val h = (height / DOWNSCALE).coerceAtLeast(1)
-            val target = bitmap?.takeIf { it.width == w && it.height == h }
-                ?: Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888).also { bitmap?.recycle(); bitmap = it }
+            val target = scratch?.takeIf { it.width == w && it.height == h }
+                ?: Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888).also { scratch?.recycle(); scratch = it }
 
             getLocationInWindow(panelLocation)
             source.getLocationInWindow(sourceLocation)
@@ -119,6 +127,9 @@ class GlassFrameLayout @JvmOverloads constructor(
             } finally {
                 capturing = false
             }
+            if (bitmap?.sameAs(target) == true) return   // nothing behind the panel changed
+            scratch = bitmap
+            bitmap = target
             invalidate()
         }
 

@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!--
         Material 3 base: the kit's screens (splash, welcome back, force update, native ads) use AppCompat,
         MaterialButton and Material 3 color attributes. The app's own screens keep their platform widgets and
@@ -26,6 +26,15 @@
         <item name="colorSurfaceContainer">@color/surface</item>
         <item name="colorSurfaceContainerHigh">@color/surface_high</item>
         <item name="colorOutlineVariant">@color/outline_faint</item>
+    </style>
+
+    <!--
+        Full-height screen with no status bar (welcome back): the window covers the status bar area and the camera
+        cutout. The navigation bar stays; the layout keeps its buttons above it (fitsSystemWindows).
+    -->
+    <style name="Theme.MovieXplore.Fullscreen">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="o_mr1">shortEdges</item>
     </style>
 
     <style name="AlertDialog" parent="android:Theme.Material.Dialog.Alert">

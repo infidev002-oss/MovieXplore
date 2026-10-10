@@ -17,8 +17,8 @@
         app:aspectRatio="0.6667">
 
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/_33sdp"
+            android:layout_height="@dimen/_33sdp"
             android:layout_gravity="center"
             android:alpha="0.6"
             android:importantForAccessibility="no"
@@ -44,18 +44,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="top|start"
-            android:layout_margin="6dp"
+            android:layout_margin="@dimen/_5sdp"
             android:background="@drawable/bg_rating_badge"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingStart="6dp"
-            android:paddingTop="3dp"
-            android:paddingEnd="8dp"
-            android:paddingBottom="3dp">
+            android:paddingStart="@dimen/_5sdp"
+            android:paddingTop="@dimen/_3sdp"
+            android:paddingEnd="@dimen/_7sdp"
+            android:paddingBottom="@dimen/_3sdp">
 
             <ImageView
-                android:layout_width="12dp"
-                android:layout_height="12dp"
+                android:layout_width="@dimen/_10sdp"
+                android:layout_height="@dimen/_10sdp"
                 android:importantForAccessibility="no"
                 android:src="@drawable/ic_star"
                 android:tint="@color/star" />
@@ -65,22 +65,22 @@
                 style="@style/Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="3dp"
+                android:layout_marginStart="@dimen/_3sdp"
                 android:fontFamily="sans-serif-medium"
-                android:textSize="12sp" />
+                android:textSize="@dimen/_10ssp" />
         </LinearLayout>
 
         <!-- Only the Watchlist shows this, to remove a title. -->
         <ImageButton
             android:id="@+id/poster_bookmark"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/_33sdp"
+            android:layout_height="@dimen/_33sdp"
             android:layout_gravity="top|end"
-            android:layout_margin="4dp"
+            android:layout_margin="@dimen/_3sdp"
             android:background="@drawable/bg_bookmark"
             android:stateListAnimator="@animator/press_scale"
             android:contentDescription="Remove from watchlist"
-            android:padding="9dp"
+            android:padding="@dimen/_8sdp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_bookmark_filled"
             android:visibility="gone" />
@@ -92,11 +92,11 @@
         style="@style/Text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="@dimen/_8sdp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/text_primary"
-        android:textSize="16sp"
+        android:textSize="@dimen/_13ssp"
         android:textStyle="bold" />
 
     <!-- Supporting detail: smaller and dimmer, so it reads as secondary. -->
@@ -105,10 +105,10 @@
         style="@style/Text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
+        android:layout_marginTop="@dimen/_3sdp"
         android:ellipsize="end"
         android:letterSpacing="0.02"
         android:maxLines="1"
         android:textColor="@color/text_tertiary"
-        android:textSize="12sp" />
+        android:textSize="@dimen/_10ssp" />
 </LinearLayout>

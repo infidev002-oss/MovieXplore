@@ -7,7 +7,6 @@ import com.movies.moviexplore.R
 import com.movies.moviexplore.data.model.MediaType
 import com.movies.moviexplore.ui.common.Navigator
 import com.movies.moviexplore.ui.common.PagedGrid
-import com.movies.moviexplore.ui.common.padForSystemBars
 import com.movies.moviexplore.ui.common.setPillSelected
 import com.movies.moviexplore.ui.main.TabFragment
 import kotlinx.coroutines.launch
@@ -37,7 +36,6 @@ class WatchlistFragment : TabFragment(R.layout.tab_watchlist) {
             emptyMessage = "Nothing saved yet. Tap the bookmark on any title to add it here.",
         )
 
-        view.findViewById<View>(R.id.watchlist_title).padForSystemBars(top = true)
         moviesPill.setOnClickListener { store.onIntent(WatchlistIntent.SelectType(MediaType.MOVIE)) }
         tvPill.setOnClickListener { store.onIntent(WatchlistIntent.SelectType(MediaType.TV)) }
         viewScope.launch { store.state.collect { render(it) } }
@@ -52,6 +50,8 @@ class WatchlistFragment : TabFragment(R.layout.tab_watchlist) {
     override fun onScrollToTop() = grid.scrollToTop()
 
     override fun applyBottomSpace(px: Int) = grid.setBottomSpace(px)
+
+    override fun applyTopSpace(view: View, px: Int) = view.findViewById<View>(R.id.watchlist_title).padTop(px)
 
     override fun onDestroy() {
         store.clear()

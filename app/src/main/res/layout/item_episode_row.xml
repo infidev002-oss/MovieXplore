@@ -5,11 +5,11 @@
     android:stateListAnimator="@animator/press_scale"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingTop="7dp"
-    android:paddingBottom="7dp">
+    android:paddingTop="@dimen/_6sdp"
+    android:paddingBottom="@dimen/_6sdp">
 
     <FrameLayout
-        android:layout_width="150dp"
+        android:layout_width="@dimen/_125sdp"
         android:layout_height="wrap_content">
 
         <include layout="@layout/view_thumbnail" />
@@ -18,7 +18,7 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
+        android:layout_marginStart="@dimen/_12sdp"
         android:layout_weight="1"
         android:orientation="vertical">
 
@@ -35,7 +35,7 @@
             style="@style/Text.BodyMedium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="@dimen/_2sdp"
             android:textColor="@color/primary" />
 
         <TextView

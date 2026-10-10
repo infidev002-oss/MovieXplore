@@ -7,12 +7,12 @@
 
     <ImageView
         android:id="@+id/sign_in_close"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="@dimen/_40sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginStart="@dimen/_7sdp"
         android:background="@android:color/transparent"
         android:contentDescription="Close"
-        android:padding="12dp"
+        android:padding="@dimen/_10sdp"
         android:src="@drawable/ic_close"
         android:stateListAnimator="@animator/press_scale" />
 
@@ -22,12 +22,12 @@
         android:layout_gravity="center"
         android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp">
+        android:paddingStart="@dimen/_20sdp"
+        android:paddingEnd="@dimen/_20sdp">
 
         <ImageView
-            android:layout_width="96dp"
-            android:layout_height="96dp"
+            android:layout_width="@dimen/_80sdp"
+            android:layout_height="@dimen/_80sdp"
             android:importantForAccessibility="no"
             android:src="@drawable/logo" />
 
@@ -35,7 +35,7 @@
             style="@style/Text.HeadlineSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="@dimen/_17sdp"
             android:accessibilityHeading="true"
             android:gravity="center"
             android:text="Sign in to MovieXplore" />
@@ -44,7 +44,7 @@
             style="@style/Text.BodyMedium.Secondary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/_7sdp"
             android:gravity="center"
             android:text="Save your watchlist to your Google account and keep it on every device." />
 
@@ -52,14 +52,14 @@
             android:id="@+id/sign_in_google"
             style="@style/Button.White"
             android:layout_width="match_parent"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="@dimen/_23sdp"
             android:text="Continue with Google" />
 
         <ProgressBar
             android:id="@+id/sign_in_progress"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_marginTop="16dp"
+            android:layout_width="@dimen/_27sdp"
+            android:layout_height="@dimen/_27sdp"
+            android:layout_marginTop="@dimen/_13sdp"
             android:indeterminateTint="@color/primary"
             android:visibility="invisible" />
     </LinearLayout>

@@ -6,14 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.BaseAdapter
-import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.movies.moviexplore.R
 import com.movies.moviexplore.data.model.Country
 import com.movies.moviexplore.data.model.TmdbImage
 import com.movies.moviexplore.data.model.WatchOffer
 import com.movies.moviexplore.ui.common.ImageLoader
+import com.movies.moviexplore.ui.common.ItemAdapter
 import com.movies.moviexplore.ui.common.inflate
 import com.movies.moviexplore.ui.common.show
 import com.movies.moviexplore.ui.common.showBottomSheet
@@ -35,6 +36,7 @@ class WatchAvailabilitySheet(
     private val countryAdapter = CountryAdapter()
     private var shownCountry: String? = null
     private var renderedOffers: Any? = null
+    private var offerAdapter = newOfferAdapter()
 
     fun render(state: WatchPanelState) {
         if (!state.isOpen) {
@@ -73,16 +75,25 @@ class WatchAvailabilitySheet(
         view.findViewById<View>(R.id.watch_message_group).show(message != null)
         view.findViewById<TextView>(R.id.watch_message).text = message
         view.findViewById<View>(R.id.watch_retry).show(!loading && state.error != null)
-        view.findViewById<View>(R.id.watch_offers_scroll).show(!loading && offers.isNotEmpty())
+        val offersRow = view.findViewById<RecyclerView>(R.id.watch_offers)
+        offersRow.show(!loading && offers.isNotEmpty())
 
+        // A new country (or new data) starts the row at its first service.
         val offersKey = state.country to state.availability
         if (offersKey != renderedOffers) {
             renderedOffers = offersKey
-            val row = view.findViewById<LinearLayout>(R.id.watch_offers)
-            row.removeAllViews()
-            offers.forEach { offer -> row.addView(offerCard(row, offer)) }
-            view.findViewById<View>(R.id.watch_offers_scroll).scrollTo(0, 0)
+            offerAdapter.submit(offers) { offersRow.scrollToPosition(0) }
         }
+    }
+
+    /** Streaming service cards: logo, name, and how it offers the title. */
+    private fun newOfferAdapter() = ItemAdapter<WatchOffer>(R.layout.item_offer, key = { it }) { card, offer ->
+        card.findViewById<View>(R.id.offer_logo_frame).clipToOutline = true
+        ImageLoader.load(card.findViewById(R.id.offer_logo), TmdbImage.logo(offer.logoPath))
+        card.findViewById<TextView>(R.id.offer_name).text = offer.providerName
+        card.findViewById<TextView>(R.id.offer_type).text = offer.type.label
+        card.contentDescription = "${offer.providerName}, ${offer.type.label}"
+        card.setOnClickListener { onOpenOffer(offer) }
     }
 
     private fun setUp(view: View) {
@@ -99,16 +110,11 @@ class WatchAvailabilitySheet(
             override fun onNothingSelected(parent: AdapterView<*>?) = Unit
         }
         view.findViewById<View>(R.id.watch_retry).setOnClickListener { onRetry() }
+        // A new sheet each time it opens, so a fresh adapter for its row.
+        offerAdapter = newOfferAdapter()
+        view.findViewById<RecyclerView>(R.id.watch_offers).adapter = offerAdapter
     }
 
-    private fun offerCard(parent: ViewGroup, offer: WatchOffer): View = parent.inflate(R.layout.item_offer).apply {
-        findViewById<View>(R.id.offer_logo_frame).clipToOutline = true
-        ImageLoader.load(findViewById(R.id.offer_logo), TmdbImage.logo(offer.logoPath))
-        findViewById<TextView>(R.id.offer_name).text = offer.providerName
-        findViewById<TextView>(R.id.offer_type).text = offer.type.label
-        contentDescription = "${offer.providerName}, ${offer.type.label}"
-        setOnClickListener { onOpenOffer(offer) }
-    }
 
     /** Countries for the Spinner: flag and name, with the current one highlighted in the open list. */
     private class CountryAdapter : BaseAdapter() {

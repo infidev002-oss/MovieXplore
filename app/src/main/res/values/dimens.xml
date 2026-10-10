@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Sizes the Kotlin code applies to views (spacing it adds between views it creates, insets it adds to the
+    system bars, …). They point to sdp values so they scale with the screen like the XML layouts.
+    Read in code with view.dimen(R.dimen.x) / context.dimen(R.dimen.x) (ui/common/Ui.kt).
+-->
+<resources>
+    <!-- Gap after each chip / pill in a row (genres, seasons). -->
+    <dimen name="chip_gap">@dimen/_8sdp</dimen>
+
+    <!-- Poster cards in a sideways row (Home, Details "Similar", Person). -->
+    <dimen name="row_poster_width">@dimen/_117sdp</dimen>
+    <dimen name="row_poster_gap">@dimen/_10sdp</dimen>
+
+    <!-- Poster grids (category, mood results, browse). -->
+    <dimen name="grid_gap_horizontal">@dimen/_8sdp</dimen>
+    <dimen name="grid_gap_vertical">@dimen/_15sdp</dimen>
+
+    <!-- Extra height under the status bar for the fading scrim at the top of scrolling screens. -->
+    <dimen name="status_scrim_extra">@dimen/_13sdp</dimen>
+    <!-- Space between the status bar and a floating Back button / top bar title. -->
+    <dimen name="below_status_bar_gap">@dimen/_10sdp</dimen>
+    <dimen name="top_bar_title_start">@dimen/_10sdp</dimen>
+
+    <!-- Floating tab bar: its gap above the navigation bar, and the space tab screens keep free under
+         their content (tab bar 52 + 2×10 padding + 12 margin, plus a 16 gap, in phone dp). -->
+    <dimen name="nav_bar_bottom_gap">@dimen/_10sdp</dimen>
+    <dimen name="floating_nav_bar_space">@dimen/_83sdp</dimen>
+
+    <!-- App toast. -->
+    <dimen name="toast_side_margin">@dimen/_20sdp</dimen>
+    <dimen name="toast_anchor_gap">@dimen/_10sdp</dimen>
+    <dimen name="toast_bottom_gap">@dimen/_23sdp</dimen>
+
+    <!-- Home: gap under the top banner, and the hero slider's dots. -->
+    <dimen name="home_banner_gap">@dimen/_7sdp</dimen>
+    <dimen name="indicator_dot_width">@dimen/_13sdp</dimen>
+    <dimen name="indicator_dot_width_selected">@dimen/_27sdp</dimen>
+
+    <!-- Details: artwork height = 16:9 of the width + extra, at least min; the info card overlaps it. -->
+    <dimen name="details_art_extra">@dimen/_60sdp</dimen>
+    <dimen name="details_art_min">@dimen/_200sdp</dimen>
+    <dimen name="details_card_overlap">@dimen/_67sdp</dimen>
+
+    <!-- Filter drawer: 84% of the screen width, but never wider than this (plain dp, so tablets and
+         landscape don't get a drawer that covers the whole list), and the gap above its search hint. -->
+    <dimen name="filter_panel_max_width">400dp</dimen>
+    <dimen name="filter_hint_top">@dimen/_10sdp</dimen>
+
+    <!-- Season list: space after the last episode. -->
+    <dimen name="season_list_bottom">@dimen/_20sdp</dimen>
+
+    <!-- Mood: gap between tiles, the Find button's slide distance and the space kept free for it. -->
+    <dimen name="mood_tile_gap">@dimen/_7sdp</dimen>
+    <dimen name="mood_find_slide">@dimen/_67sdp</dimen>
+    <dimen name="mood_find_space">@dimen/_60sdp</dimen>
+</resources>

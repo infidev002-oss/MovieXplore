@@ -72,24 +72,35 @@ kit/java/network/      TmdbApi + model/Models   (STARTER: add endpoints/fields f
 kit/java/watchlist/    WatchlistItem, WatchlistDao (+AppDatabase), WatchlistRemote, WatchlistRepository
 kit/java/ads/          AdsConsent, BannerAd, NativeAdViewModel, NativeAdBinder,
                        AdNavigator, SplashInterstitial, AdLoadingOverlay, AdState,
-                       WelcomeBack, WelcomeBackActivity, NativeAds (+NativeSize)
+                       WelcomeBack, WelcomeBackActivity, NativeAds (+NativeSize), NativeAdRowAdapter
 kit/java/playstore/    PlayStore, ForceUpdate (+ForceUpdateDialog), InAppUpdate, AppReview → …/your/app/playstore/
 kit/java/splash/       SplashFlow (the whole splash sequence)                              → …/your/app/splash/
 kit/debug/AppCheckInit.kt    → app/src/debug/java/your/app/
 kit/release/AppCheckInit.kt  → app/src/release/java/your/app/
 kit/res/layout/   ads_loading_overlay.xml, ads_welcome_back.xml, playstore_force_update.xml,
-                  ads_native_small/medium/large.xml, ads_native_placeholder_small/medium/large.xml → app/src/main/res/layout/
+                  ads_native_small/medium/large.xml, ads_native_placeholder_small/medium/large.xml,
+                  ads_banner_placeholder.xml                                              → app/src/main/res/layout/
 kit/res/drawable/ ads_welcome_ring.xml, ads_welcome_hero.xml, ads_native_bg.xml, ads_native_badge_bg.xml,
-                  ads_native_placeholder_block.xml                                        → app/src/main/res/drawable/
+                  ads_native_placeholder_block.xml, ads_banner_placeholder.xml           → app/src/main/res/drawable/
 kit/res/values/   ads_strings.xml, ads_styles.xml, ads_ids.xml, playstore_strings.xml      → app/src/main/res/values/
 kit/proguard-rules.pro       → merge into app/proguard-rules.pro
 ```
 
 - If the app already has a Room database, add `WatchlistItem` as an entity and `WatchlistDao` to it instead of using the kit's `AppDatabase` (keep the DAO queries).
 - `WatchlistItem` is both the Room entity and the Firebase model. Keep its field names.
-- You may restyle `ads_loading_overlay.xml`, `ads_welcome_back.xml`, `playstore_force_update.xml`, the `ads_native_*` layouts,
-  the drawables, `ads_styles.xml` and the
-  texts; keep the file names, view ids and string names. They use theme attributes (`?attr/colorPrimary`, …) so they follow the app theme.
+- You may restyle `ads_loading_overlay.xml` and `playstore_force_update.xml` and their texts; keep the
+  file names, view ids and string names.
+- **Welcome-back screen `ads_welcome_back.xml`: redesign it** to match your app (required). The layout is free, with these rules:
+  - keep a clickable view with id `ads_welcome_start` (the Start button); without it the screen closes at once
+  - optional ids, used only if present: `ads_welcome_icon` (ImageView, gets the app icon), `ads_welcome_subtitle` (TextView,
+    gets the `ads_welcome_subtitle` string with the app name), `ads_welcome_progress` (shown until Start is enabled),
+    `ads_welcome_hero` (a fixed-height panel; made shorter in landscape)
+  - one layout for portrait **and** landscape (the screen handles rotation itself, so `layout-land` is never used):
+    make it scrollable and keep Start reachable in landscape
+  - texts: change the `ads_welcome_*` strings freely; no other ad, link or button that leaves the screen
+- The kit layouts use theme attributes (`?attr/colorPrimary`, …) so they follow the app theme.
+- Native ad layouts (`ads_native_*` layouts, `ads_native_*` drawables, `AdsNativeBadge` / `AdsNativeCta` in `ads_styles.xml`):
+  you may change **colors only**. Nothing else: no sizes, margins, view order, views added or removed, ids or text.
 
 ---
 
@@ -276,9 +287,13 @@ Read only through `RemoteValues`. Ignore unknown keys.
 | `URLAdInterval` | **seconds** | `RemoteValues.urlAdInterval` → ms (not used by app code) |
 | `ppLink`, `tncLink` | String | `privacyPolicyUrl`, `termsUrl` |
 | `min_supported_version` | Long | `minSupportedVersion` (used by `ForceUpdate`) |
-| `gle_banner_id1/2/3`, `gle_native_ob`, `gle_native_home`, `gle_native_settings`, `gle_native_category`, `gle_inter_id`, `gle_splashInter_id`, `gle_welcome_inter_id` | ad unit object | `adUnitIds(key)`, `isAdUnitEnabled(key)` |
+| `gle_banner_splash`, `gle_banner_home`, `gle_banner_cat`, `gle_banner_info`, `gle_native_ob`, `gle_native_home`, `gle_native_settings`, `gle_native_cat`, `gle_inter_id`, `gle_splashInter_id`, `gle_welcome_inter_id` | ad unit object | `adUnitIds(key)`, `isAdUnitEnabled(key)` |
 
-Ad unit object: `{"id": ["unit1", "unit2"], "isEnabled": true}`. Native units may add `"heightCTA": 40` (dp, the CTA
+Ad unit object: `{"id": ["unit1", "unit2"], "isEnabled": true}`. Banner units may add `"inline": true | false` (inline adaptive
+banner for banners inside scrolling content; missing = the code's choice) with `"maxHeight"` (dp, default 90), `"size": "standard" |
+"large"` (anchored only; default standard: full width, ~50–65 dp; large: Google's large anchored, 50–150 dp), `"collapsible": true |
+false` and `"collapsiblePosition": "top" | "bottom"` (anchored only; must match where that banner sits; it collapses to the chosen
+size) — the kit reads them. Native units may add `"heightCTA": 40` (dp, the CTA
 button height; missing = 40) and `"layout": "small" | "medium" | "large"` (overrides the size the code asks for; missing = the code's size). The kit keeps it within 36..`AdRules.nativeCtaMaxDp()` (default 46) — read via `RemoteValues.nativeCtaHeight(key)`, never directly.
 
 The splash fetch is done by the kit's `SplashFlow` (interval 0, 10 s timeout, reset first when the saved fetch time is in the
@@ -304,6 +319,7 @@ class SplashActivity : AppCompatActivity() {
             onStatus = { status ->                // OFFLINE = show "turn on internet", LOADING = "please wait"
                 …
             },
+            bannerContainer = binding.splashBanner,  // optional: empty FrameLayout (visibility="gone") for the splash banner
             onDone = { destination ->
                 startActivity(destination ?: Intent(this, <first screen>::class.java))
                 finish()
@@ -323,7 +339,8 @@ Manifest (the splash handles rotation itself):
 
 What `SplashFlow` does, in this fixed order: waits for internet → Remote Config (section 11), then `Startup.run`; in parallel
 consent + Mobile Ads init and the notification permission → force update (stops there) → `AuthManager.recordAppOpen()` →
-interstitial preload → splash interstitial (up to `SplashCounter` s) → `onDone(destination)`. It blocks Back, runs
+interstitial preload → splash interstitial (up to `SplashCounter` s) → `onDone(destination)`. If you pass `bannerContainer`, it
+loads `BANNER_SPLASH` there once, right after consent (no reload). It blocks Back, runs
 `Startup` once per launch even if the splash is recreated, and never waits more than 30 s for it.
 
 - A non-null `destination` always wins: start it instead of your first screen.
@@ -337,9 +354,10 @@ interstitial preload → splash interstitial (up to `SplashCounter` s) → `onDo
 | Need | Use |
 |---|---|
 | Consent + Mobile Ads init | `AdsConsent.gather()` in the splash only |
-| Banner | `BannerAd.load(activity, lifecycleOwner, container, RemoteValues.BANNER_HOME / BANNER_LIST / BANNER_DETAILS, label, root)` — in a Fragment pass `viewLifecycleOwner` |
+| Banner | `BannerAd.load(activity, lifecycleOwner, container, RemoteValues.BANNER_HOME / BANNER_CAT / BANNER_INFO, root = slotRoot)` (details: add `inline = true`) — in a Fragment pass `viewLifecycleOwner`; spacing is automatic. The splash banner is loaded by `SplashFlow` (section 12) |
 | Native (kit layouts) | per placement (`KEY` = one of the four `RemoteValues.NATIVE_*` constants below): `private val xNative by lazy { NativeAds.viewModel(this, KEY) }`, then `NativeAds.attach(lifecycleOwner, xNative, slot, KEY, NativeSize.SMALL / MEDIUM / LARGE)` — `slot` is an empty `FrameLayout` (`visibility="gone"`); in a Fragment pass `viewLifecycleOwner`, in an Activity `this` |
-| Native in a RecyclerView row | hold the ad from that placement's `NativeAds.viewModel(…).ad` and call `NativeAds.show(slot, ad, KEY, NativeSize.X)` in the ViewHolder |
+| Native as the first item of a list | `NativeAdRowAdapter(lifecycleOwner, xNative, KEY, NativeSize.X)` first in a `ConcatAdapter`; grid: `spanSizeLookup = nativeRow.fullSpanLookup(spanCount)`; call `nativeRow.onScreenVisible()` in `onResume()` (when not hidden) and `onHiddenChanged(false)` |
+| Native in the middle of a list | hold the ad from `xNative.ad`, `NativeAds.show(slot, ad, KEY, NativeSize.X)` in the ViewHolder; on each visit `xNative.refreshOnVisit(KEY, NativeAds.isRowVisible(recyclerView, rowPosition))`; in the adapter's `onViewAttachedToWindow` for that row `xNative.onRowVisible(KEY)` |
 | Native (your own layout) | collect `nativeAdViewModel.ad`; bind with `NativeAdBinder.bind(adView, ad, headline, body, cta, icon, media)` |
 | Interstitial on navigation | `AdNavigator.open(activity, intent)`; for non-intent moments `AdNavigator.showThen(activity) { … }` |
 | Splash interstitial | inside `SplashFlow` (section 12); never call `SplashInterstitial` yourself |
@@ -356,11 +374,37 @@ an ad, on excluded screens, when the unit / `ad_status` / consent says no, or be
   `AppReview` already do it.
 - Never show your own ad on returning to the app.
 
-Native refresh rule: call `nativeAdViewModel.refreshIfNeeded(unitKey)` **only while the screen is visible** —
-in `onResume()` when `!isHidden`, and in `onHiddenChanged(false)` for tabs switched with hide/show.
-Never call it from a timer. The `NativeAdInterval` cap applies per screen's native ad.
+Native refresh rule: one refresh per visit, only while the screen is visible — in `onResume()` when `!isHidden`, and in
+`onHiddenChanged(false)` for tabs switched with hide/show. Fixed slots: `refreshIfNeeded(KEY)`. Natives inside a list:
+`refreshOnVisit` / `onRowVisible` (or `NativeAdRowAdapter`), so a row that is scrolled out of view loads its new ad only when
+the user scrolls to it — no request for an ad nobody sees. Never refresh from a timer or on plain scrolling. The
+`NativeAdInterval` cap applies per placement. Logcat tag `NativeAds` shows when a request is made.
 
-Placements: `BANNER_HOME` home, `BANNER_LIST` list pages, `BANNER_DETAILS` details pages.
+Banners — exactly these four placements, each with its own Remote Config unit:
+
+| Placement | Constant | Remote Config key | Default type / size |
+|---|---|---|---|
+| Splash screen | `RemoteValues.BANNER_SPLASH` | `gle_banner_splash` | large |
+| Home | `RemoteValues.BANNER_HOME` | `gle_banner_home` | standard, **collapsible** — place it at the **bottom**, above the navigation (template: `collapsiblePosition: bottom`) |
+| Category list | `RemoteValues.BANNER_CAT` | `gle_banner_cat` | standard |
+| Movie / TV details | `RemoteValues.BANNER_INFO` | `gle_banner_info` | **inline**, max 90 dp |
+
+Every banner shows a pulsing placeholder with "Advertisement" (`ads_banner_placeholder.xml`, same height as the banner)
+until the ad loads, and hides its slot when every id fails or nothing arrives within 15 s. Type, size and collapsible come
+from Remote Config (section 11). The banner slot is an empty `FrameLayout` (`visibility="gone"`); the kit shows it.
+
+- **Inline vs anchored:** a banner inside scrolling content (the details page) must be **inline adaptive** — call
+  `BannerAd.load(…, RemoteValues.BANNER_INFO, root = …, inline = true)`. Banners fixed at the top or bottom are anchored
+  (the default). Never put an anchored banner inside scrolling content (AdMob policy).
+- **Spacing is automatic:** the kit adds vertical space around each banner by placement — home and category 5 dp, details
+  10 dp, splash 0 (top and bottom) — outside Google's banner size, and it disappears with the slot when there is no ad.
+  **Never add banner margins in your layout.** `marginTopDp` / `marginBottomDp` exist only for a screen that really needs
+  something else.
+- Natives include their spacing too: 10 dp on every side, built into the kit layouts. Don't add margins around them.
+
+**System bars (targetSdk 35+ is edge-to-edge):** a top banner must sit below the status bar and a bottom banner above
+the navigation bar — apply the window insets (`ViewCompat.setOnApplyWindowInsetsListener`, padding = status / navigation
+bar insets). Otherwise the bars cover the banner and take its taps (a collapsible banner's collapse arrow stops working).
 
 Natives — exactly these four placements, each with its own Remote Config unit:
 
@@ -369,7 +413,7 @@ Natives — exactly these four placements, each with its own Remote Config unit:
 | Onboarding screen | `RemoteValues.NATIVE_OB` | `gle_native_ob` |
 | Home | `RemoteValues.NATIVE_HOME` | `gle_native_home` |
 | Settings | `RemoteValues.NATIVE_SETTINGS` | `gle_native_settings` |
-| Category list (the screen that lists one selected genre) | `RemoteValues.NATIVE_CATEGORY` | `gle_native_category` |
+| Category list (the screen that lists one selected genre) | `RemoteValues.NATIVE_CATEGORY` | `gle_native_cat` |
 
 Each unit has its own ids, `isEnabled`, `heightCTA` and optional `layout`. Pick each screen's default size in code; the
 unit's `layout` in Remote Config can change it later. Never use one placement's constant on another screen, and don't

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import com.movies.moviexplore.R
-import com.movies.moviexplore.config.RemoteValues
 import com.movies.moviexplore.data.MediaRepository
 import com.movies.moviexplore.data.model.MediaType
 import com.movies.moviexplore.data.model.Mood
@@ -15,7 +14,6 @@ import com.movies.moviexplore.ui.browse.BrowseUiState
 import com.movies.moviexplore.ui.common.BaseActivity
 import com.movies.moviexplore.ui.common.Navigator
 import com.movies.moviexplore.ui.common.PagedGrid
-import com.movies.moviexplore.ui.common.bindBanner
 import com.movies.moviexplore.ui.common.bindTopBar
 import com.movies.moviexplore.ui.common.onSystemBars
 import com.movies.moviexplore.ui.common.setPillSelected
@@ -29,7 +27,6 @@ class MoodResultsActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_grid)
-        bindBanner(this, RemoteValues.BANNER_LIST, findViewById(R.id.banner_root))
         type = savedInstanceState?.getString(KEY_TYPE)?.let(MediaType::valueOf) ?: MediaType.MOVIE
 
         val moods = intent.getStringExtra(Navigator.EXTRA_MOODS).orEmpty().split(',')

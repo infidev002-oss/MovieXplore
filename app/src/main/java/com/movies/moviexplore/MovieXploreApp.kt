@@ -5,7 +5,6 @@ import com.movies.moviexplore.ads.WelcomeBack
 import com.movies.moviexplore.ads.WelcomeBackActivity
 import com.movies.moviexplore.data.ContentLocaleInterceptor
 import com.movies.moviexplore.data.SettingsRepository
-import com.movies.moviexplore.hooks.AdRules
 import com.movies.moviexplore.hooks.NetworkHooks
 import com.movies.moviexplore.network.NetworkClient
 import com.movies.moviexplore.ui.onboarding.OnboardingActivity
@@ -22,8 +21,6 @@ class MovieXploreApp : Application() {
         SettingsRepository.get(this)
         NetworkHooks.interceptors += ContentLocaleInterceptor()
         WatchlistRepository.init(this)      // resumes watchlist sync if already signed in
-        // Global ads switch (AdsConfig): every kit ad checks this hook before loading and showing.
-        AdRules.isAdUnitEnabled = { _, isEnabled -> AdsConfig.ADS_ENABLED && isEnabled }
         // Welcome-back screen, then every screen it must never open over.
         WelcomeBack.install(this, WelcomeBackActivity::class.java, SplashActivity::class.java, OnboardingActivity::class.java, SignInActivity::class.java)
         // Nothing here may make a TMDB request or touch NetworkClient.okHttp / retrofit.

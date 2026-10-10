@@ -3,8 +3,9 @@ package com.movies.moviexplore.ui.common
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.updateLayoutParams
+import androidx.recyclerview.widget.RecyclerView
 import com.movies.moviexplore.R
 import com.movies.moviexplore.data.model.Credit
 import com.movies.moviexplore.data.model.Media
@@ -42,23 +43,31 @@ fun ViewGroup.addSectionHeader(title: String, onSeeAll: (() -> Unit)? = null): V
         addView(header)
     }
 
-/** Adds an empty sideways-scrolling row to [this] and returns the container its cards go into. */
-fun ViewGroup.addHorizontalRow(): LinearLayout {
-    val row = inflate(R.layout.view_horizontal_row)
+/** Adds an empty sideways-scrolling row (a horizontal RecyclerView) to [this] and returns it. */
+fun ViewGroup.addHorizontalRow(): RecyclerView {
+    val row = inflate(R.layout.view_horizontal_row) as RecyclerView
     addView(row)
-    return row.findViewById(R.id.row_items)
+    return row
+}
+
+/** Adds a sideways row showing [items], each row item drawn from [layout] by [bind]. */
+private fun <T : Any> ViewGroup.addItemsRow(items: List<T>, layout: Int, key: (T) -> Any, bind: (View, T) -> Unit) {
+    val adapter = ItemAdapter(layout, key, bind)
+    addHorizontalRow().adapter = adapter
+    adapter.submit(items)
 }
 
 /** A titled row of poster cards. Nothing is added for an empty list. */
 fun ViewGroup.addMediaRow(title: String, items: List<Media>, onOpen: (Media) -> Unit, onSeeAll: (() -> Unit)? = null) {
     if (items.isEmpty()) return
     addSectionHeader(title, onSeeAll)
-    val row = addHorizontalRow()
-    items.forEach { media ->
-        val card = row.inflate(R.layout.item_poster)
-        card.layoutParams = LinearLayout.LayoutParams(dp(140), ViewGroup.LayoutParams.WRAP_CONTENT).apply { marginEnd = dp(12) }
+    addItemsRow(items, R.layout.item_poster, key = { it.key }) { card, media ->
+        // item_poster fills a grid column; in a row it gets a fixed width.
+        card.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            width = dimen(R.dimen.row_poster_width)
+            marginEnd = dimen(R.dimen.row_poster_gap)
+        }
         card.bindPoster(media, onOpen)
-        row.addView(card)
     }
 }
 
@@ -66,16 +75,13 @@ fun ViewGroup.addMediaRow(title: String, items: List<Media>, onOpen: (Media) -> 
 fun ViewGroup.addCreditsRow(title: String, credits: List<Credit>, onOpen: (Int) -> Unit) {
     if (credits.isEmpty()) return
     addSectionHeader(title)
-    val row = addHorizontalRow()
-    credits.forEach { credit ->
-        val item = row.inflate(R.layout.item_credit)
+    addItemsRow(credits, R.layout.item_credit, key = { it }) { item, credit ->
         item.findViewById<View>(R.id.credit_photo_frame).clipToOutline = true
         ImageLoader.load(item.findViewById(R.id.credit_photo), TmdbImage.profile(credit.profilePath))
         item.findViewById<TextView>(R.id.credit_name).text = credit.name
         item.findViewById<TextView>(R.id.credit_role).text = credit.role
         item.contentDescription = "${credit.name}, ${credit.role}"
         item.setOnClickListener { onOpen(credit.id) }
-        row.addView(item)
     }
 }
 
@@ -83,15 +89,12 @@ fun ViewGroup.addCreditsRow(title: String, credits: List<Credit>, onOpen: (Int) 
 fun ViewGroup.addTrailersRow(videos: List<Video>) {
     if (videos.isEmpty()) return
     addSectionHeader("Trailers & Teasers")
-    val row = addHorizontalRow()
-    videos.forEach { video ->
-        val item = row.inflate(R.layout.item_video)
+    addItemsRow(videos, R.layout.item_video, key = { it.key }) { item, video ->
         ImageLoader.load(item.findViewById(R.id.thumbnail_image), video.thumbnailUrl)
         item.findViewById<TextView>(R.id.video_name).text = video.name
         item.findViewById<TextView>(R.id.video_type).text = video.type
         item.contentDescription = "Play ${video.name}"
         item.setOnClickListener { it.context.playOnYouTube(video) }
-        row.addView(item)
     }
 }
 
@@ -117,12 +120,12 @@ fun View.bindTopBar(title: String, onBack: (() -> Unit)?) {
         show(onBack != null)
         setOnClickListener { onBack?.invoke() }
     }
-    if (onBack == null) findViewById<TextView>(R.id.top_bar_title).setPadding(dp(12), 0, 0, 0)
+    if (onBack == null) findViewById<TextView>(R.id.top_bar_title).setPadding(dimen(R.dimen.top_bar_title_start), 0, 0, 0)
     padForSystemBars(top = true)
 }
 
 /** Moves a floating view (like the round back button) below the status bar. */
-fun View.placeBelowStatusBar(extraTopMargin: Int = dp(12)) {
+fun View.placeBelowStatusBar(extraTopMargin: Int = dimen(R.dimen.below_status_bar_gap)) {
     onSystemBars { bars ->
         (layoutParams as ViewGroup.MarginLayoutParams).topMargin = bars.top + extraTopMargin
         requestLayout()

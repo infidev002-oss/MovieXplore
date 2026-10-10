@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Optional welcome-back ids the kit looks up (AGENTS.md §4). This design has no app-icon view or
+         shrinkable hero, so they are declared here only for R to compile; the kit skips them when absent. -->
+    <item name="ads_welcome_icon" type="id" />
+    <item name="ads_welcome_hero" type="id" />
+</resources>

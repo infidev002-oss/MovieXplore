@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Account: a top bar with Back, the signed-in user (or a sign-in card), one card per settings row, and the
-    TMDB attribution. The content column is capped and centred on wide screens in ProfileFragment.
+    Account: the tab header, a top panel (the signed-in user, or a sign-in
+    card), one card per settings row, and the TMDB attribution.
+    Responsive: every size is sdp / ssp (scales with the screen's smallest width, so phones and tablets keep
+    the same proportions), each card is a ConstraintLayout, and side-by-side buttons share the width by
+    weightSum. The content column is capped and centred in landscape / wide screens in ProfileFragment.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/profile_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -18,114 +22,262 @@
             android:id="@+id/profile_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp">
+            android:orientation="vertical">
 
+            <!-- Same header as the other tabs (TabHeader); the column already has the side padding. -->
             <LinearLayout
                 android:id="@+id/profile_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:minHeight="56dp"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/profile_back"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginStart="-8dp"
-                    android:background="@android:color/transparent"
-                    android:stateListAnimator="@animator/press_scale"
-                    android:contentDescription="Back"
-                    android:padding="8dp"
-                    android:src="@drawable/ic_back" />
+                style="@style/TabHeader"
+                android:paddingStart="0dp"
+                android:paddingEnd="0dp">
 
                 <TextView
-                    style="@style/Text.TitleLarge"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:accessibilityHeading="true"
+                    style="@style/Text.TabTitle"
                     android:text="Account" />
+
+                <TextView
+                    style="@style/Text.TabSubtitle"
+                    android:text="Sign-in, language and app settings" />
             </LinearLayout>
 
-            <!-- Shown when signed out. -->
-            <LinearLayout
+            <!--
+                Top panel when signed out, styled like a movie poster: four trending posters fill the card, fade into
+                the card colour (bg_sign_in_fade), and the film icon, a short reason to sign in and the Sign in with
+                Google button sit centred on top. Posters are set in ProfileFragment; offline the card just shows its
+                own gradient.
+            -->
+            <FrameLayout
                 android:id="@+id/profile_sign_in"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_card_row"
-                android:stateListAnimator="@animator/press_scale"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="14dp">
-
-                <ImageView
-                    android:layout_width="52dp"
-                    android:layout_height="52dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_account_circle" />
+                android:layout_marginTop="@dimen/_7sdp"
+                android:layout_marginBottom="@dimen/_8sdp"
+                android:background="@drawable/bg_profile_hero">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:id="@+id/profile_sign_in_posters"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:importantForAccessibility="noHideDescendants"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:scaleType="centerCrop" />
+
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="@dimen/_2sdp"
+                        android:layout_weight="1"
+                        android:scaleType="centerCrop" />
+
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="@dimen/_2sdp"
+                        android:layout_weight="1"
+                        android:scaleType="centerCrop" />
+
+                    <ImageView
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="@dimen/_2sdp"
+                        android:layout_weight="1"
+                        android:scaleType="centerCrop" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_sign_in_fade" />
+
+                <!-- Starts lower down, so the top of the posters shows above the text. -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_marginEnd="12dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:paddingStart="@dimen/_12sdp"
+                    android:paddingTop="@dimen/_70sdp"
+                    android:paddingEnd="@dimen/_12sdp"
+                    android:paddingBottom="@dimen/_14sdp">
+
+                    <ImageView
+                        android:id="@+id/profile_sign_in_icon"
+                        android:layout_width="@dimen/_38sdp"
+                        android:layout_height="@dimen/_38sdp"
+                        android:background="@drawable/bg_profile_avatar_ring"
+                        android:importantForAccessibility="no"
+                        android:padding="@dimen/_8sdp"
+                        android:src="@drawable/ic_movie"
+                        android:tint="@color/primary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
+                        android:id="@+id/profile_sign_in_title"
                         style="@style/Text.TitleMedium"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Sign in to Account" />
+                        android:layout_marginTop="@dimen/_8sdp"
+                        android:accessibilityHeading="true"
+                        android:gravity="center"
+                        android:text="Sign in to MovieXplore"
+                        android:textSize="@dimen/_15ssp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/profile_sign_in_icon" />
+
+                    <TextView
+                        android:id="@+id/profile_sign_in_subtitle"
+                        style="@style/Text.BodySmall"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/_3sdp"
+                        android:gravity="center"
+                        android:text="Back up your watchlist and sync it across devices."
+                        android:textSize="@dimen/_10ssp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/profile_sign_in_title" />
+
+                    <!-- Google's official "Sign in with Google" button (light, pill, 180×40 dp) from
+                         developers.google.com/identity/branding-guidelines. Scaled with the screen but never
+                         stretched (adjustViewBounds keeps its ratio); don't recolour or redraw it. -->
+                    <ImageView
+                        android:id="@+id/profile_google_sign_in"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/_40sdp"
+                        android:layout_marginTop="@dimen/_12sdp"
+                        android:adjustViewBounds="true"
+                        android:background="@android:color/transparent"
+                        android:clickable="true"
+                        android:contentDescription="Sign in with Google"
+                        android:focusable="true"
+                        android:paddingTop="@dimen/_3sdp"
+                        android:paddingBottom="@dimen/_3sdp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/btn_google_sign_in"
+                        android:stateListAnimator="@animator/press_scale"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/profile_sign_in_subtitle" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </FrameLayout>
+
+            <!-- Top panel when signed in: avatar, name, email and sync status. Logout is a settings row below. -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/profile_user"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_7sdp"
+                android:background="@drawable/bg_profile_hero"
+                android:padding="@dimen/_12sdp"
+                android:visibility="gone">
+
+                <!-- The initial shows until (or unless) the Google photo loads on top of it. -->
+                <FrameLayout
+                    android:id="@+id/profile_avatar"
+                    android:layout_width="@dimen/_44sdp"
+                    android:layout_height="0dp"
+                    android:background="@drawable/bg_profile_avatar_ring"
+                    android:padding="@dimen/_2sdp"
+                    app:layout_constraintDimensionRatio="1:1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/profile_initial"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_profile_avatar"
+                        android:fontFamily="sans-serif-medium"
+                        android:gravity="center"
+                        android:importantForAccessibility="no"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/_16ssp" />
+
+                    <!-- Clipped to a circle in ProfileFragment. -->
+                    <ImageView
+                        android:id="@+id/profile_photo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:importantForAccessibility="no"
+                        android:scaleType="centerCrop" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/profile_name"
+                    style="@style/Text.TitleMedium"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/_10sdp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textSize="@dimen/_14ssp"
+                    app:layout_constraintBottom_toTopOf="@id/profile_email"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/profile_avatar"
+                    app:layout_constraintTop_toTopOf="@id/profile_avatar"
+                    app:layout_constraintVertical_chainStyle="packed" />
+
+                <TextView
+                    android:id="@+id/profile_email"
+                    style="@style/Text.BodySmall"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_1sdp"
+                    android:ellipsize="middle"
+                    android:singleLine="true"
+                    android:textSize="@dimen/_10ssp"
+                    app:layout_constraintBottom_toTopOf="@id/profile_synced"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/profile_name"
+                    app:layout_constraintTop_toBottomOf="@id/profile_name" />
+
+                <LinearLayout
+                    android:id="@+id/profile_synced"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_5sdp"
+                    android:background="@drawable/bg_profile_chip"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/_6sdp"
+                    android:paddingTop="@dimen/_2sdp"
+                    android:paddingEnd="@dimen/_8sdp"
+                    android:paddingBottom="@dimen/_2sdp"
+                    app:layout_constraintBottom_toBottomOf="@id/profile_avatar"
+                    app:layout_constraintStart_toStartOf="@id/profile_name"
+                    app:layout_constraintTop_toBottomOf="@id/profile_email">
+
+                    <ImageView
+                        android:layout_width="@dimen/_11sdp"
+                        android:layout_height="@dimen/_11sdp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_cloud_done"
+                        android:tint="@color/primary" />
 
                     <TextView
                         style="@style/Text.BodySmall"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="Sign in to your account to access synced content." />
+                        android:layout_marginStart="@dimen/_5sdp"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="Watchlist synced"
+                        android:textColor="@color/primary"
+                        android:textSize="@dimen/_9ssp" />
                 </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <TextView
-                    style="@style/Text.Label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Login"
-                    android:textColor="@color/year" />
-            </LinearLayout>
-
-            <!-- Shown when signed in. -->
-            <LinearLayout
-                android:id="@+id/profile_user"
+            <!-- Settings native ad (RemoteValues.NATIVE_SETTINGS), small, under the top panel. The kit shows it and adds its spacing. -->
+            <FrameLayout
+                android:id="@+id/profile_native"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="vertical"
-                android:paddingTop="4dp"
-                android:paddingBottom="6dp"
-                android:visibility="gone">
-
-                <ImageView
-                    android:layout_width="96dp"
-                    android:layout_height="96dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_account_circle" />
-
-                <TextView
-                    android:id="@+id/profile_name"
-                    style="@style/Text.TitleLarge"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:ellipsize="end"
-                    android:gravity="center"
-                    android:maxLines="2" />
-            </LinearLayout>
+                android:visibility="gone" />
 
             <!-- One card per settings row, added in ProfileFragment. -->
             <LinearLayout
@@ -134,60 +286,59 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
 
-            <!-- Native ad (kit NativeAds, RemoteValues.NATIVE_SETTINGS); shown by NativeAds.attach. -->
-            <FrameLayout
-                android:id="@+id/profile_native"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:visibility="gone" />
-
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/profile_tmdb"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:background="@drawable/bg_card_row"
-                android:stateListAnimator="@animator/press_scale"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="14dp">
+                android:padding="@dimen/_12sdp"
+                android:stateListAnimator="@animator/press_scale">
 
                 <ImageView
-                    android:layout_width="68dp"
-                    android:layout_height="49dp"
+                    android:id="@+id/profile_tmdb_logo"
+                    android:layout_width="@dimen/_56sdp"
+                    android:layout_height="@dimen/_40sdp"
                     android:contentDescription="The Movie Database logo"
                     android:scaleType="fitCenter"
-                    android:src="@drawable/logo" />
+                    android:src="@drawable/logo"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/profile_tmdb_title"
+                    style="@style/Text.TitleMedium"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="14dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_marginStart="@dimen/_12sdp"
+                    android:text="TMDB License"
+                    android:textSize="@dimen/_14ssp"
+                    app:layout_constraintBottom_toTopOf="@id/profile_tmdb_text"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/profile_tmdb_logo"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_chainStyle="packed" />
 
-                    <TextView
-                        style="@style/Text.TitleMedium"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="TMDB License" />
-
-                    <TextView
-                        style="@style/Text.BodySmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:text="This app uses the TMDB API but is not endorsed or certified by TMDB." />
-                </LinearLayout>
-            </LinearLayout>
+                <TextView
+                    android:id="@+id/profile_tmdb_text"
+                    style="@style/Text.BodySmall"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_2sdp"
+                    android:text="This app uses the TMDB API but is not endorsed or certified by TMDB."
+                    android:textSize="@dimen/_10ssp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/profile_tmdb_title"
+                    app:layout_constraintTop_toBottomOf="@id/profile_tmdb_title" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <View
         android:id="@+id/profile_status_scrim"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="@dimen/_34sdp"
         android:alpha="0"
         android:background="@drawable/bg_status_scrim" />
 </FrameLayout>
