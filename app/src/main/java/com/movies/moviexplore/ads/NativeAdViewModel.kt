@@ -101,7 +101,7 @@ class NativeAdViewModel(application: Application) : AndroidViewModel(application
                     if (cleared) { loading = false; return }
                     load(ids, index + 1)
                 }
-                override fun onAdClicked() { AdState.markAdClicked() }
+                override fun onAdClicked() { AdState.markAdClicked(getApplication()) }
             })
             .build()
             .loadAd(AdRequest.Builder().build())

@@ -1,13 +1,11 @@
 package com.movies.moviexplore.ads
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.os.Handler
-import android.os.Looper
-import com.google.android.gms.ads.AdError
+import android.util.Log
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
@@ -20,75 +18,100 @@ import androidx.core.content.edit
  * - open(activity, intent): every ad-carrying screen change goes through this.
  * - showThen(activity) { … }: same rules for non-intent moments (e.g. switching tabs).
  * Rules: AdRules.beforeInterstitial first; then the interstitial if enabled, loaded, not expired and
- * at least AdRules.interAdInterval() ms since the last one; a 1 s "Ad showing…" overlay precedes it.
+ * at least AdRules.interAdInterval() ms since the last one; a 1 s "Ad showing…" notice precedes it (Back closes only
+ * the notice). Never shown while the app is in the background, nor after the daily click cap (AdRules.maxAdClicksPerDay).
+ * Loading: after consent (splash), after each show, when the app returns to the foreground, and on a tap when
+ * there is no ad — never sooner than 30 s after a failed load. Logcat tag "Inter".
  */
 object AdNavigator {
+    private const val TAG = "Inter"
     private const val PREFS = "ads"
     private const val KEY_LAST_SHOWN = "inter_last_shown_ms"
     private const val EXPIRY_MS = 55 * 60 * 1000L     // AdMob interstitials expire after ~1 hour
+    private const val RETRY_COOLDOWN_MS = 30 * 1000L  // Google advises against rapid retries after a failed load
 
     private var interstitial: InterstitialAd? = null
     private var loadedAt = 0L
     private var loading = false
+    private var lastFailAt = 0L
     private var showing = false
 
-    /** Call after consent (splash) and after each show. Safe to call often. */
+    /** Call after consent (splash). Safe to call often: no-op when an ad is fresh, loading, or in the cooldown. */
     fun preload(context: Context) {
+        (context.applicationContext as? Application)?.let { ScreenTracker.install(it) }
         if (loading) return
         if (interstitial != null && System.currentTimeMillis() - loadedAt < EXPIRY_MS) return
         interstitial = null
         if (!AdsConsent.canRequestAds(context) || !RemoteValues.isAdUnitEnabled(RemoteValues.INTER)) return
+        if (AdState.clickLimitReached(context)) { Log.d(TAG, "load skipped: daily click cap reached"); return }
         val ids = RemoteValues.adUnitIds(RemoteValues.INTER)
         if (ids.isEmpty()) return
+        val sinceFail = System.currentTimeMillis() - lastFailAt
+        if (sinceFail in 0 until RETRY_COOLDOWN_MS) {
+            Log.d(TAG, "load skipped: cooldown after failure (${sinceFail / 1000} s of ${RETRY_COOLDOWN_MS / 1000} s)")
+            return
+        }
         loading = true
+        Log.d(TAG, "load start, ids=${ids.size}")
         load(context.applicationContext, ids, 0)
     }
 
     private fun load(context: Context, ids: List<String>, index: Int) {
-        if (index >= ids.size) { loading = false; return }
+        if (index >= ids.size) {
+            loading = false
+            lastFailAt = System.currentTimeMillis()
+            Log.w(TAG, "load failed: all ${ids.size} ids failed")
+            return
+        }
         InterstitialAd.load(context, ids[index], AdRequest.Builder().build(), object : InterstitialAdLoadCallback() {
             override fun onAdLoaded(ad: InterstitialAd) {
                 interstitial = ad
                 loadedAt = System.currentTimeMillis()
                 loading = false
+                lastFailAt = 0L
+                Log.d(TAG, "loaded: id #$index")
             }
-            override fun onAdFailedToLoad(error: LoadAdError) { load(context, ids, index + 1) }
+            override fun onAdFailedToLoad(error: LoadAdError) {
+                Log.w(TAG, "id #$index failed: code=${error.code} ${error.message}")
+                load(context, ids, index + 1)
+            }
         })
     }
 
-    fun open(activity: Activity, intent: Intent) = showThen(activity) { activity.startActivity(intent) }
+    /** Opens [intent] with the interstitial before it when due. After a rotation it opens from the new screen. */
+    fun open(activity: Activity, intent: Intent) = showThenOn(activity) { screen ->
+        try { screen.startActivity(intent) } catch (e: Exception) { Log.w(TAG, "open failed", e) }
+    }
 
-    fun showThen(activity: Activity, next: () -> Unit) {
+    /** Runs [next] after the interstitial when due (or straight away). */
+    fun showThen(activity: Activity, next: () -> Unit) = showThenOn(activity) { next() }
+
+    private fun showThenOn(activity: Activity, next: (Activity) -> Unit) {
         if (showing) return
-        if (AdRules.beforeInterstitial(activity)) { next(); return }
+        if (AdRules.beforeInterstitial(activity)) { next(activity); return }
 
         val ad = interstitial?.takeIf { System.currentTimeMillis() - loadedAt < EXPIRY_MS }
-        if (ad == null || !isInterstitialDue(activity) || !RemoteValues.isAdUnitEnabled(RemoteValues.INTER)) {
-            next()
-            preload(activity)
+        val due = isInterstitialDue(activity)
+        Log.d(TAG, "show check: adReady=${ad != null} due=$due loading=$loading from=${activity.javaClass.simpleName}")
+        if (ad == null || !due || !RemoteValues.isAdUnitEnabled(RemoteValues.INTER) || AdState.clickLimitReached(activity)) {
+            next(activity)
+            preload(activity)                          // missing / stale / failed earlier: retry (cooldown applies)
             return
         }
 
-        interstitial = null
         showing = true
-        val overlay = AdLoadingOverlay.show(activity)
-        val finish = {
-            overlay.dismiss()
+        InterstitialShow.run(activity, ad) { end, screen ->
             showing = false
-            next()
-            preload(activity)
+            when (end) {
+                InterstitialShow.End.CLOSED -> {
+                    if (interstitial === ad) interstitial = null
+                    screen?.let(next)
+                    preload(screen ?: activity)
+                }
+                InterstitialShow.End.BACKGROUND -> Unit          // app in the background: ad kept, stay on this screen
+                InterstitialShow.End.SCREEN_GONE -> screen?.let(next)   // recreated screen: open without an ad
+            }
         }
-        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdShowedFullScreenContent() { overlay.dismiss(); AdState.fullScreenAdShowing = true }
-            override fun onAdDismissedFullScreenContent() { AdState.fullScreenAdShowing = false; finish() }
-            override fun onAdFailedToShowFullScreenContent(error: AdError) { AdState.fullScreenAdShowing = false; finish() }
-            override fun onAdClicked() { AdState.markAdClicked() }
-        }
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (activity.isFinishing || activity.isDestroyed) { overlay.dismiss(); showing = false; return@postDelayed }
-            markInterstitialShown(activity)
-            ad.show(activity)
-        }, AdLoadingOverlay.SHOW_DELAY_MS)
     }
 
     /**

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
+import com.movies.moviexplore.ads.AdNavigator
 import com.movies.moviexplore.mvi.MviStore
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -24,10 +25,17 @@ abstract class BaseActivity : FragmentActivity() {
     protected val uiScope = MainScope()
     private val stores = mutableListOf<MviStore<*, *, *>>()
 
+    /**
+     * Back closes the screen through the kit's AdNavigator, which shows an interstitial first when one is due.
+     * False on screens where Back must never show an ad (the main screen, where Back leaves the app; onboarding; sign-in).
+     */
+    protected open val showAdOnBack = true
+
     private var backHandler: (() -> Unit)? = null
     private val backCallback = object : OnBackPressedCallback(false) {
         override fun handleOnBackPressed() {
-            backHandler?.invoke()
+            val handler = backHandler
+            if (handler != null) handler() else AdNavigator.showThen(this@BaseActivity) { finish() }
         }
     }
 
@@ -35,6 +43,7 @@ abstract class BaseActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         drawEdgeToEdge()
         onBackPressedDispatcher.addCallback(this, backCallback)
+        updateBackCallback()
     }
 
     /**
@@ -43,7 +52,15 @@ abstract class BaseActivity : FragmentActivity() {
      */
     protected fun interceptBack(handler: (() -> Unit)?) {
         backHandler = handler
-        backCallback.isEnabled = handler != null
+        updateBackCallback()
+    }
+
+    /** For in-screen back arrows: the same as the system Back (closes a panel first, ad when due). */
+    protected fun goBack() = onBackPressedDispatcher.onBackPressed()
+
+    // Disabled = the system's own Back (no ad), which keeps predictive back where no ad can show.
+    private fun updateBackCallback() {
+        backCallback.isEnabled = backHandler != null || showAdOnBack
     }
 
     /** Registers [this] store so it is cleared with the screen. */

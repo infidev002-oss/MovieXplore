@@ -17,6 +17,8 @@ import kotlinx.coroutines.launch
  */
 class SignInActivity : BaseActivity() {
 
+    override val showAdOnBack = false   // no interstitial on the sign-in screen
+
     private lateinit var store: SignInStore
 
     override fun onCreate(savedInstanceState: Bundle?) {

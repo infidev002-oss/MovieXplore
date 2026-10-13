@@ -12,6 +12,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.movies.moviexplore.R
+import com.movies.moviexplore.ads.NativeAds
+import com.movies.moviexplore.ads.NativeSize
+import com.movies.moviexplore.config.RemoteValues
 import com.movies.moviexplore.data.ContentLocale
 import com.movies.moviexplore.data.SettingsRepository
 import com.movies.moviexplore.ui.common.BaseActivity
@@ -26,9 +29,12 @@ import kotlin.math.abs
  * First-run onboarding as one screen with three pages that slide sideways: content language, country, and how
  * the app works. The step dashes and the Previous / Next buttons stay put; only the page scrolls, and only on
  * those buttons (or Back). Next saves the page's choice (used by every TMDB request, see ContentLocaleInterceptor);
- * Start on the last page finishes onboarding. Opened only through [OnboardingFlow]; no interstitials here.
+ * Start on the last page finishes onboarding. Opened only through [OnboardingFlow]; no interstitials here, only the
+ * onboarding native under the buttons.
  */
 class OnboardingActivity : BaseActivity() {
+
+    override val showAdOnBack = false   // no interstitial while onboarding
 
     private class Tip(val icon: Int, val title: String, val text: String)
 
@@ -38,6 +44,8 @@ class OnboardingActivity : BaseActivity() {
         Tip(R.drawable.ic_bookmark, "Save to Watchlist", "Bookmark titles. Sign in with Google to sync them."),
         Tip(R.drawable.ic_play_circle, "Trailers & Where to Watch", "Open any title for trailers, cast and streaming options."),
     )
+
+    private val onboardingNative by lazy { NativeAds.viewModel(this, RemoteValues.NATIVE_OB) }
 
     private lateinit var store: OnboardingStore
     private lateinit var pager: ViewPager2
@@ -75,6 +83,9 @@ class OnboardingActivity : BaseActivity() {
         prev.setOnClickListener { store.onIntent(OnboardingIntent.PreviousClicked) }
         next.setOnClickListener { store.onIntent(OnboardingIntent.NextClicked) }
 
+        // One native under the buttons for all three pages (the pages slide; the ad stays put).
+        NativeAds.attach(this, onboardingNative, findViewById(R.id.onboarding_native), RemoteValues.NATIVE_OB, NativeSize.SMALL)
+
         store.state.observe { render(it) }
         store.effects.observe { effect ->
             when (effect) {
@@ -106,6 +117,11 @@ class OnboardingActivity : BaseActivity() {
         next.text = if (page == PAGES - 1) "Start" else "Next"
         // Back steps to the previous page; on the first page it leaves the app as usual.
         interceptBack(if (page > 0) ({ store.onIntent(OnboardingIntent.PreviousClicked) }) else null)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        onboardingNative.refreshIfNeeded(RemoteValues.NATIVE_OB)   // one native refresh per visit
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

@@ -1,122 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Welcome-back screen (kit WelcomeBackActivity), movie-app style: a tilted wall of trending posters behind,
-     fading into the app background, with "Welcome back" and the white Start pill at the bottom.
-     Kit contract (AGENTS.md §4): ads_welcome_start (required; disabled by the kit until the ad is ready),
-     ads_welcome_subtitle and ads_welcome_progress. One layout for portrait and landscape; the content scrolls. -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Welcome-back screen (WelcomeBackActivity). SAMPLE design: redesign it to match your app. Required: a clickable
+     view with id ads_welcome_start. Optional: ads_welcome_icon, ads_welcome_subtitle, ads_welcome_progress, ads_welcome_hero.
+     One layout for portrait and landscape (no layout-land): keep it scrollable. -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/ads_welcome_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="?android:attr/colorBackground"
+    android:fillViewport="true">
 
-    <!-- Posters, tilted and a little enlarged so the edges stay covered. -->
-    <com.movies.moviexplore.ui.welcome.WelcomePosterWall
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:rotation="-8"
-        android:scaleX="1.25"
-        android:scaleY="1.25" />
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="24dp">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/welcome_wall_fade" />
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:fitsSystemWindows="true"
-        android:scrollbars="none">
-
-        <LinearLayout
+        <!-- Hero: rings + app icon card -->
+        <FrameLayout
+            android:id="@+id/ads_welcome_hero"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="bottom|center_horizontal"
-            android:orientation="vertical"
-            android:paddingStart="@dimen/_20sdp"
-            android:paddingTop="@dimen/_40sdp"
-            android:paddingEnd="@dimen/_20sdp"
-            android:paddingBottom="@dimen/_47sdp">
+            android:layout_height="240dp"
+            android:background="@drawable/ads_welcome_hero">
 
-            <!-- Brand line: the app's name with a film icon. -->
-            <TextView
-                style="@style/Text.Label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawableStart="@drawable/ic_movie"
-                android:drawablePadding="@dimen/_5sdp"
-                android:drawableTint="@color/primary"
-                android:gravity="center_vertical"
-                android:letterSpacing="0.06"
-                android:text="@string/app_name"
-                android:textColor="@color/primary"
-                android:textSize="@dimen/_13ssp" />
+            <View
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center"
+                android:alpha="0.12"
+                android:background="@drawable/ads_welcome_ring" />
 
-            <TextView
-                android:id="@+id/ads_welcome_title"
-                style="@style/Text.Headline"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_8sdp"
-                android:accessibilityHeading="true"
-                android:gravity="center"
-                android:text="@string/ads_welcome_back"
-                android:textSize="@dimen/_23ssp" />
+            <View
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center"
+                android:alpha="0.25"
+                android:background="@drawable/ads_welcome_ring" />
 
-            <TextView
-                android:id="@+id/ads_welcome_subtitle"
-                style="@style/Text.BodyMedium.Secondary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_7sdp"
-                android:gravity="center"
-                android:maxWidth="@dimen/_267sdp"
-                android:textSize="@dimen/_12ssp" />
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:layout_gravity="center"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="6dp">
 
-            <!-- Start: the app's white pill with a play icon; a faint glass pill with a spinner until the kit enables
-                 it. A plain container, not a Button: this AppCompat screen would turn a Button into a tinted MaterialButton. -->
-            <FrameLayout
-                android:layout_width="@dimen/_220sdp"
-                android:layout_height="@dimen/_43sdp"
-                android:layout_marginTop="@dimen/_27sdp">
-
-                <FrameLayout
-                    android:id="@+id/ads_welcome_start"
+                <ImageView
+                    android:id="@+id/ads_welcome_icon"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/ads_welcome_start_bg"
-                    android:clickable="true"
-                    android:contentDescription="@string/ads_welcome_start"
-                    android:enabled="false"
-                    android:focusable="true"
-                    android:stateListAnimator="@animator/press_scale">
+                    android:contentDescription="@null"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter" />
+            </com.google.android.material.card.MaterialCardView>
+        </FrameLayout>
 
-                    <!-- Follows the pill's enabled state (duplicateParentState) for its text and icon colours. -->
-                    <TextView
-                        style="@style/Text.Label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:drawableStart="@drawable/ic_play"
-                        android:drawablePadding="@dimen/_5sdp"
-                        android:drawableTint="@color/ads_welcome_start_icon"
-                        android:duplicateParentState="true"
-                        android:gravity="center_vertical"
-                        android:importantForAccessibility="no"
-                        android:text="@string/ads_welcome_start"
-                        android:textColor="@color/ads_welcome_start_text"
-                        android:textSize="@dimen/_14ssp" />
-                </FrameLayout>
+        <TextView
+            android:id="@+id/ads_welcome_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:gravity="center"
+            android:text="@string/ads_welcome_back"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:textColor="?attr/colorOnSurface"
+            android:textStyle="bold" />
 
-                <ProgressBar
-                    android:id="@+id/ads_welcome_progress"
-                    android:layout_width="@dimen/_22sdp"
-                    android:layout_height="@dimen/_22sdp"
-                    android:layout_gravity="center"
-                    android:indeterminate="true"
-                    android:indeterminateTint="@color/text_primary" />
-            </FrameLayout>
-        </LinearLayout>
-    </ScrollView>
-</FrameLayout>
+        <TextView
+            android:id="@+id/ads_welcome_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/ads_welcome_start"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:enabled="false"
+                android:text="@string/ads_welcome_start"
+                android:textSize="16sp"
+                app:cornerRadius="28dp" />
+
+            <ProgressBar
+                android:id="@+id/ads_welcome_progress"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:elevation="8dp"
+                android:indeterminate="true" />
+        </FrameLayout>
+    </LinearLayout>
+</ScrollView>

@@ -12,4 +12,6 @@ object AdRules {
     @Volatile var beforeInterstitial: (activity: Activity) -> Boolean = { false }
     // Largest native CTA button height in dp (heightCTA from Remote Config is clamped to 36..this).
     @Volatile var nativeCtaMaxDp: () -> Int = { 46 }
+    // Ad taps per day after which no more interstitials are shown until tomorrow (0 = off).
+    @Volatile var maxAdClicksPerDay: () -> Int = { RemoteValues.maxAdClicksPerDay }
 }

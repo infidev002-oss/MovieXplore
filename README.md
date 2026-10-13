@@ -202,6 +202,12 @@ other way, and never add App Open ads.
 | Welcome-back screen + ad | returning to the app | automatic after `WelcomeBack.install` (section 3) |
 | Interstitial on a screen change | any navigation that should carry an ad | `AdNavigator.open(activity, intent)` instead of `startActivity(intent)` |
 | Interstitial before another action | e.g. before closing a screen | `AdNavigator.showThen(activity) { … }` |
+
+Interstitials show after a 1 s "Ad showing…" notice; **Back closes only the notice, the ad still shows**. None is shown
+while the app is in the background (the splash ad waits for the user to come back). The splash ad never shows sooner
+than about 5 s after it starts loading, so the splash banner is seen first. The kit loads, retries (not sooner than 30 s
+after a failure) and reloads the interstitial when the app comes back to the foreground — never load ads yourself.
+Remote Config `MaxAdClicksPerDay` (0 = off) stops interstitials for the day after that many ad taps.
 | Splash banner | splash | pass `bannerContainer` to `SplashFlow.start` (section 4); the kit loads it once |
 | Banner | home / category list / details | `BannerAd.load(activity, lifecycleOwner, slot, RemoteValues.BANNER_HOME / BANNER_CAT / BANNER_INFO, root = slotRoot)` — details adds `inline = true` (Fragment: `viewLifecycleOwner`) |
 | Native | the four placements below | `NativeAds.attach(...)` (below) |
@@ -233,26 +239,31 @@ override fun onHiddenChanged(hidden: Boolean) {          // tabs switched with h
 ```
 
 - `attach()` shows a loading placeholder, then the ad, and hides the slot when there is no ad.
+- **Spacing around a native is yours** (the kit adds none): put a margin on the slot `FrameLayout`, e.g.
+  `android:layout_margin="10dp"`. The slot is `gone` while there is no ad, so the margin disappears with it.
 - Call `refreshIfNeeded` **only while the screen is visible** (one refresh per visit), never from a timer.
 
-**Native inside a list (e.g. the category list):** put it as the first item with the kit's `NativeAdRowAdapter`:
+**Native inside a list (e.g. the category list): always use the kit's `NativeAdRowAdapter`**, as the first item or between
+sections:
 
 ```kotlin
 private val categoryNative by lazy { NativeAds.viewModel(this, RemoteValues.NATIVE_CATEGORY) }
 private lateinit var nativeRow: NativeAdRowAdapter
 
 // onCreate
-nativeRow = NativeAdRowAdapter(this, categoryNative, RemoteValues.NATIVE_CATEGORY, NativeSize.MEDIUM)
+nativeRow = NativeAdRowAdapter(this, categoryNative, RemoteValues.NATIVE_CATEGORY, NativeSize.MEDIUM,
+    marginDp = 10)                                       // space around the ad, your design (default 0)
 val grid = GridLayoutManager(this, 3).apply { spanSizeLookup = nativeRow.fullSpanLookup(3) }   // ad row = full width
 recyclerView.layoutManager = grid
-recyclerView.adapter = ConcatAdapter(nativeRow, postersAdapter)
+recyclerView.adapter = ConcatAdapter(nativeRow, postersAdapter)   // between sections: ConcatAdapter(a, nativeRow, b)
 
 override fun onResume() { super.onResume(); nativeRow.onScreenVisible() }
 ```
 
 It shows a placeholder, then the ad, removes the row when there is no ad, and refreshes once per visit — only when the
 row is on screen (scrolled away: when the user scrolls back to it). Don't put the native above the RecyclerView in a
-`NestedScrollView`: that turns off recycling and breaks paging. A native in the *middle* of a list (like Home):
+`NestedScrollView`: that turns off recycling and breaks paging. Only a native *inside one adapter's items* (e.g. after
+the 10th poster of the same grid) needs your own row type (margin on an inner slot, `gone` when there is no ad):
 `xNative.refreshOnVisit(KEY, NativeAds.isRowVisible(recyclerView, rowPosition))` on each visit and
 `xNative.onRowVisible(KEY)` from the row's `onViewAttachedToWindow` (see `AGENTS.md` §13).
 - The size you pass is the default. Remote Config (`layout`) can change it later, and also sets the button height.
@@ -274,8 +285,8 @@ row is on screen (scrolled away: when the user scrolls back to it). Don't put th
   `"collapsible"` (true / false) and `"collapsiblePosition"` (`top` / `bottom`, must match where that banner is on screen).
 - A banner inside scrolling content (details) must be **inline**; fixed top / bottom banners are anchored. Never put an
   anchored banner inside scrolling content.
-- **Spacing is automatic** (table above), outside Google's banner size. Never add margins around banners or natives in
-  your layouts (natives have 10 dp on every side built in).
+- **Banner spacing is automatic** (table above), outside Google's banner size. Never add margins around banners.
+  Natives are the opposite: they have no spacing, add your own (slot margin or `marginDp`).
 - **Edge-to-edge (targetSdk 35+):** keep a top banner below the status bar and a bottom banner above the navigation bar
   by applying window insets. If a system bar covers the banner, it also takes its taps (a collapsible banner can't collapse).
 
@@ -339,6 +350,8 @@ Both only appear for apps installed from Google Play (internal testing track). N
 - Debug build on a real phone with **Google's test ad ids** (the Remote Config template has them). Never click real ads.
 - Turn the phone's internet off, then start the app: the splash says "turn on internet" and continues when it's back.
 - Rotate the phone on the splash, onboarding, home and the welcome-back screen. Nothing may crash or restart.
+- Tap something that shows an interstitial and press Back on the "Ad showing…" notice: the notice closes, the ad still shows.
+- Press Home while the splash shows "Ad showing…", come back: the splash ad shows about 1 s later, then the app continues.
 - Press Home, then come back: the welcome-back screen appears (after the interstitial gap). Open a link and come back:
   no welcome-back screen.
 - Sign in, add to watchlist, reinstall, sign in again: the watchlist comes back.

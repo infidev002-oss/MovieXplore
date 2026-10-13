@@ -33,7 +33,7 @@ class PersonActivity : BaseActivity() {
         val store = PersonStore(MediaRepository.shared, intent.getIntExtra(Navigator.EXTRA_ID, 0)).attach()
 
         // Inside the scrolling header, which already starts below the status bar.
-        findViewById<View>(R.id.floating_back).setOnClickListener { finish() }
+        findViewById<View>(R.id.floating_back).setOnClickListener { goBack() }
         val scroll = findViewById<ScrollView>(R.id.person_scroll)
         scroll.padForSystemBars(top = true, bottom = true)
         findViewById<View>(R.id.person_photo_frame).clipToOutline = true

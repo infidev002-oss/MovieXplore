@@ -102,17 +102,19 @@ class PagedGrid(
         (loadingMore.layoutParams as ViewGroup.MarginLayoutParams).bottomMargin = px
     }
 
-    /** Gaps between poster columns and rows. The native ad row keeps its own built-in spacing. */
+    /** Gaps between poster columns and rows, and below the native ad row (the kit adds no spacing around it). */
     private inner class Spacing(private val horizontal: Int, private val vertical: Int) : RecyclerView.ItemDecoration() {
         override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
             val adapterPosition = parent.getChildAdapterPosition(view).takeIf { it != RecyclerView.NO_POSITION } ?: return
-            val position = adapterPosition - (nativeRow?.itemCount ?: 0)   // poster index
+            val adRows = nativeRow?.itemCount ?: 0                       // 0 while there is no ad
+            val position = adapterPosition - adRows   // poster index
             if (position < 0) return
             val columns = layoutManager.spanCount
             val column = position % columns
             outRect.left = column * horizontal / columns
             outRect.right = horizontal - (column + 1) * horizontal / columns
-            outRect.top = if (position >= columns) vertical else 0
+            // First poster row: same gap below the ad as between poster rows.
+            outRect.top = if (position >= columns || adRows > 0) vertical else 0
         }
     }
 

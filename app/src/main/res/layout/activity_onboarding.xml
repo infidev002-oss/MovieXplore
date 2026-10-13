@@ -44,4 +44,14 @@
         android:layout_weight="1" />
 
     <include layout="@layout/view_onboarding_nav" />
+
+    <!-- Onboarding native (RemoteValues.NATIVE_OB), the same on all three pages; gone while there is no ad. -->
+    <FrameLayout
+        android:id="@+id/onboarding_native"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/_13sdp"
+        android:layout_marginEnd="@dimen/_13sdp"
+        android:layout_marginBottom="@dimen/_8sdp"
+        android:visibility="gone" />
 </LinearLayout>

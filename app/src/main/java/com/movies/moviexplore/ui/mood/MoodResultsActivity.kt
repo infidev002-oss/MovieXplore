@@ -35,7 +35,7 @@ class MoodResultsActivity : BaseActivity() {
         // One store per tab, so each keeps its results and paging when switching back and forth.
         val stores = MediaType.entries.associateWith { BrowseStore(MediaRepository.shared, it, moods.toFilter(it)).attach() }
 
-        findViewById<View>(R.id.top_bar).bindTopBar(moods.joinToString(" + ") { "${it.emoji} ${it.label}" }, onBack = ::finish)
+        findViewById<View>(R.id.top_bar).bindTopBar(moods.joinToString(" + ") { "${it.emoji} ${it.label}" }, onBack = ::goBack)
         findViewById<View>(R.id.grid_pills).show(true)
         val moviesPill = findViewById<TextView>(R.id.pill_movies)
         val tvPill = findViewById<TextView>(R.id.pill_tv)

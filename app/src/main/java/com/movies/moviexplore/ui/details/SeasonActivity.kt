@@ -67,7 +67,7 @@ class SeasonActivity : BaseActivity() {
         backdropPath = intent.getStringExtra(Navigator.EXTRA_BACKDROP)
         store = SeasonStore(MediaRepository.shared, tvId, intent.getIntExtra(Navigator.EXTRA_SEASON, 1)).attach()
 
-        findViewById<View>(R.id.top_bar).bindTopBar(showName, onBack = ::finish)
+        findViewById<View>(R.id.top_bar).bindTopBar(showName, onBack = ::goBack)
         findViewById<RecyclerView>(R.id.season_pills).adapter = pillAdapter
         list = findViewById(R.id.season_episodes)
         list.adapter = episodeAdapter

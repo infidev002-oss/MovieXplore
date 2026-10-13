@@ -38,6 +38,7 @@ object RemoteValues {
     val nativeAdInterval: Long get() = settings().optLong("NativeAdInterval", 20L) * 1000   // per native placement
     val urlAdInterval: Long get() = settings().optLong("URLAdInterval", 20L) * 1000
     val splashCounter: Long get() = settings().optLong("SplashCounter", 8L)       // seconds (max wait for splash ad)
+    val maxAdClicksPerDay: Int get() = settings().optInt("MaxAdClicksPerDay", 0)  // daily ad-tap cap for interstitials, 0 = off
     val privacyPolicyUrl: String get() = settings().optString("ppLink", "")
     val termsUrl: String get() = settings().optString("tncLink", "")
     val minSupportedVersion: Long get() = settings().optLong("min_supported_version", 0L)

@@ -45,7 +45,7 @@ class EpisodeActivity : BaseActivity() {
 
         findViewById<View>(R.id.floating_back).apply {
             placeBelowStatusBar()
-            setOnClickListener { finish() }
+            setOnClickListener { goBack() }
         }
         val scroll = findViewById<ScrollView>(R.id.episode_scroll)
         val scrim = findViewById<View>(R.id.episode_status_scrim)

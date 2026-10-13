@@ -72,7 +72,8 @@ kit/java/network/      TmdbApi + model/Models   (STARTER: add endpoints/fields f
 kit/java/watchlist/    WatchlistItem, WatchlistDao (+AppDatabase), WatchlistRemote, WatchlistRepository
 kit/java/ads/          AdsConsent, BannerAd, NativeAdViewModel, NativeAdBinder,
                        AdNavigator, SplashInterstitial, AdLoadingOverlay, AdState,
-                       WelcomeBack, WelcomeBackActivity, NativeAds (+NativeSize), NativeAdRowAdapter
+                       WelcomeBack, WelcomeBackActivity, NativeAds (+NativeSize), NativeAdRowAdapter,
+                       InterstitialShow, ScreenTracker (internal: used by the kit, never call them)
 kit/java/playstore/    PlayStore, ForceUpdate (+ForceUpdateDialog), InAppUpdate, AppReview → …/your/app/playstore/
 kit/java/splash/       SplashFlow (the whole splash sequence)                              → …/your/app/splash/
 kit/debug/AppCheckInit.kt    → app/src/debug/java/your/app/
@@ -101,6 +102,7 @@ kit/proguard-rules.pro       → merge into app/proguard-rules.pro
 - The kit layouts use theme attributes (`?attr/colorPrimary`, …) so they follow the app theme.
 - Native ad layouts (`ads_native_*` layouts, `ads_native_*` drawables, `AdsNativeBadge` / `AdsNativeCta` in `ads_styles.xml`):
   you may change **colors only**. Nothing else: no sizes, margins, view order, views added or removed, ids or text.
+  They have no outer spacing: the space **around** a native is yours, on the slot or row (section 13).
 
 ---
 
@@ -283,6 +285,7 @@ Read only through `RemoteValues`. Ignore unknown keys.
 | `ad_status` | Boolean | `RemoteValues.adStatus` (master switch) |
 | `SplashCounter` | **seconds** | `RemoteValues.splashCounter` (max wait for the splash ad) |
 | `InterAdInterval` | **seconds** | `RemoteValues.interAdInterval` → ms; use `AdRules.interAdInterval()` |
+| `MaxAdClicksPerDay` | Int | `RemoteValues.maxAdClicksPerDay`; use `AdRules.maxAdClicksPerDay()` — ad taps per day after which no interstitials until tomorrow; `0` = off |
 | `NativeAdInterval` | **seconds** | `RemoteValues.nativeAdInterval` → ms; use `AdRules.nativeAdInterval()` |
 | `URLAdInterval` | **seconds** | `RemoteValues.urlAdInterval` → ms (not used by app code) |
 | `ppLink`, `tncLink` | String | `privacyPolicyUrl`, `termsUrl` |
@@ -339,7 +342,8 @@ Manifest (the splash handles rotation itself):
 
 What `SplashFlow` does, in this fixed order: waits for internet → Remote Config (section 11), then `Startup.run`; in parallel
 consent + Mobile Ads init and the notification permission → force update (stops there) → `AuthManager.recordAppOpen()` →
-interstitial preload → splash interstitial (up to `SplashCounter` s) → `onDone(destination)`. If you pass `bannerContainer`, it
+interstitial preload → splash interstitial (up to `SplashCounter` s; when it loads early the splash is held until 5 s
+after its load started, so the splash banner shows first) → `onDone(destination)`. If you pass `bannerContainer`, it
 loads `BANNER_SPLASH` there once, right after consent (no reload). It blocks Back, runs
 `Startup` once per launch even if the splash is recreated, and never waits more than 30 s for it.
 
@@ -356,12 +360,20 @@ loads `BANNER_SPLASH` there once, right after consent (no reload). It blocks Bac
 | Consent + Mobile Ads init | `AdsConsent.gather()` in the splash only |
 | Banner | `BannerAd.load(activity, lifecycleOwner, container, RemoteValues.BANNER_HOME / BANNER_CAT / BANNER_INFO, root = slotRoot)` (details: add `inline = true`) — in a Fragment pass `viewLifecycleOwner`; spacing is automatic. The splash banner is loaded by `SplashFlow` (section 12) |
 | Native (kit layouts) | per placement (`KEY` = one of the four `RemoteValues.NATIVE_*` constants below): `private val xNative by lazy { NativeAds.viewModel(this, KEY) }`, then `NativeAds.attach(lifecycleOwner, xNative, slot, KEY, NativeSize.SMALL / MEDIUM / LARGE)` — `slot` is an empty `FrameLayout` (`visibility="gone"`); in a Fragment pass `viewLifecycleOwner`, in an Activity `this` |
-| Native as the first item of a list | `NativeAdRowAdapter(lifecycleOwner, xNative, KEY, NativeSize.X)` first in a `ConcatAdapter`; grid: `spanSizeLookup = nativeRow.fullSpanLookup(spanCount)`; call `nativeRow.onScreenVisible()` in `onResume()` (when not hidden) and `onHiddenChanged(false)` |
-| Native in the middle of a list | hold the ad from `xNative.ad`, `NativeAds.show(slot, ad, KEY, NativeSize.X)` in the ViewHolder; on each visit `xNative.refreshOnVisit(KEY, NativeAds.isRowVisible(recyclerView, rowPosition))`; in the adapter's `onViewAttachedToWindow` for that row `xNative.onRowVisible(KEY)` |
+| Native in a list (**use this**) | `NativeAdRowAdapter(lifecycleOwner, xNative, KEY, NativeSize.X, marginDp = …)` in a `ConcatAdapter`: first item `ConcatAdapter(nativeRow, listAdapter)`, or between sections `ConcatAdapter(sectionA, nativeRow, sectionB)`; grid: `spanSizeLookup = nativeRow.fullSpanLookup(spanCount)`; call `nativeRow.onScreenVisible()` in `onResume()` (when not hidden) and `onHiddenChanged(false)`. `marginDp` = space around the ad (default 0) |
+| Native inside one adapter's items (only when the row adapter can't be used) | hold the ad from `xNative.ad`, `NativeAds.show(slot, ad, KEY, NativeSize.X)` in the ViewHolder; on each visit `xNative.refreshOnVisit(KEY, NativeAds.isRowVisible(recyclerView, rowPosition))`; in the adapter's `onViewAttachedToWindow` for that row `xNative.onRowVisible(KEY)` |
 | Native (your own layout) | collect `nativeAdViewModel.ad`; bind with `NativeAdBinder.bind(adView, ad, headline, body, cta, icon, media)` |
-| Interstitial on navigation | `AdNavigator.open(activity, intent)`; for non-intent moments `AdNavigator.showThen(activity) { … }` |
+| Interstitial on navigation | `AdNavigator.open(activity, intent)`; for non-intent moments `AdNavigator.showThen(activity) { … }` — loading, the gap, the notice and rotation are handled (see below) |
 | Splash interstitial | inside `SplashFlow` (section 12); never call `SplashInterstitial` yourself |
 | Welcome-back screen + ad | `WelcomeBack.install(…)` in the Application (section 6); nothing else to call — see below |
+
+Interstitials (navigation, splash, welcome back) show after a 1 s "Ad showing…" notice. **Back closes only the notice; the
+ad still shows.** No interstitial is ever shown while the app is in the background (Home pressed or phone locked during
+the notice): the splash keeps its ad and shows it 1 s after the user comes back; navigation and welcome back skip it and
+keep it. After `MaxAdClicksPerDay` ad taps in a day (banner, native or interstitial) no interstitial loads or shows until
+the next day. A rotation during the notice is handled (the ad shows on the recreated screen, then the next screen opens). The navigation
+interstitial loads by itself: after consent, after each show, when the app returns to the foreground, and on a tap when
+there is no ad — never sooner than 30 s after a failed load. Never load or retry interstitials yourself. Logcat tag `Inter`.
 
 Welcome back: when the app returns from the background, `WelcomeBack` opens `WelcomeBackActivity` (app icon, "Welcome back",
 Start). Start shows the `gle_welcome_inter_id` interstitial (preloaded when the app goes to the background), then the user is
@@ -400,7 +412,9 @@ from Remote Config (section 11). The banner slot is an empty `FrameLayout` (`vis
   10 dp, splash 0 (top and bottom) — outside Google's banner size, and it disappears with the slot when there is no ad.
   **Never add banner margins in your layout.** `marginTopDp` / `marginBottomDp` exist only for a screen that really needs
   something else.
-- Natives include their spacing too: 10 dp on every side, built into the kit layouts. Don't add margins around them.
+- **Natives have no built-in spacing** — add the space around them to fit your design: a margin on the native slot
+  `FrameLayout` (it stays `gone` while there is no ad, so an empty slot takes no space), or `marginDp` on
+  `NativeAdRowAdapter`. In your own adapter row, put the margin on an inner slot and set it `gone` when there is no ad.
 
 **System bars (targetSdk 35+ is edge-to-edge):** a top banner must sit below the status bar and a bottom banner above
 the navigation bar — apply the window insets (`ViewCompat.setOnApplyWindowInsetsListener`, padding = status / navigation
@@ -483,6 +497,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
 - [ ] Database writes match section 8
 - [ ] Remote Config read only via `RemoteValues`; intervals treated as seconds in Remote Config
 - [ ] Ads only via the kit; native refresh only while visible
+- [ ] Natives in lists via `NativeAdRowAdapter`; spacing around natives added by you (slot margin / `marginDp`), none around banners
 - [ ] `WelcomeBack.install` with all excluded screens; `skipNextResume()` before every intent that leaves the app
 - [ ] `InAppUpdate` is an Activity property; Rate us uses `AppReview.openPlayStore`; splash uses `ForceUpdate`
 - [ ] Splash uses `SplashFlow` (section 12) with `configChanges` in the manifest; a non-null destination wins

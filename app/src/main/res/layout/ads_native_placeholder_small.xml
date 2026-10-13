@@ -3,8 +3,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="10dp"
-    android:layout_marginVertical="10dp"
     android:background="@drawable/ads_native_bg"
     android:orientation="vertical"
     android:padding="10dp">

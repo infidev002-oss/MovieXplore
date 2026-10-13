@@ -20,4 +20,6 @@
     <color name="white_15">#26FFFFFF</color>
     <color name="panel">#FF0B1219</color>
     <color name="panel_row">#FF151E28</color>
+    <color name="ads_cta_bg">#FFFFFFFF</color>
+    <color name="ads_cta_text">#000000</color>
 </resources>

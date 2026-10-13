@@ -277,6 +277,7 @@
                 android:id="@+id/profile_native"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/_8sdp"
                 android:visibility="gone" />
 
             <!-- One card per settings row, added in ProfileFragment. -->
@@ -291,8 +292,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_card_row"
-                android:padding="@dimen/_12sdp"
-                android:stateListAnimator="@animator/press_scale">
+                android:padding="@dimen/_12sdp">
 
                 <ImageView
                     android:id="@+id/profile_tmdb_logo"

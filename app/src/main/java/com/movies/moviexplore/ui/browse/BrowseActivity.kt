@@ -64,7 +64,7 @@ class BrowseActivity : BaseActivity() {
         type = intent.mediaType()
         store = BrowseStore(MediaRepository.shared, type, DiscoverFilter(), loadGenres = true).attach()
 
-        findViewById<View>(R.id.top_bar).bindTopBar(intent.getStringExtra(Navigator.EXTRA_TITLE).orEmpty(), onBack = ::finish)
+        findViewById<View>(R.id.top_bar).bindTopBar(intent.getStringExtra(Navigator.EXTRA_TITLE).orEmpty(), onBack = ::goBack)
         setUpSearch()
         genreChips = findViewById(R.id.genre_chips)
         genreChips.adapter = genreAdapter

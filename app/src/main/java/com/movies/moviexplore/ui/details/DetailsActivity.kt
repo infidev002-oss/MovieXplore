@@ -30,6 +30,7 @@ import com.movies.moviexplore.ui.common.ItemAdapter
 import com.movies.moviexplore.ui.common.Navigator
 import com.movies.moviexplore.ui.common.addCreditsRow
 import com.movies.moviexplore.ui.common.addHorizontalRow
+import com.movies.moviexplore.ui.common.lockSwipeDirection
 import com.movies.moviexplore.ui.common.addMediaRow
 import com.movies.moviexplore.ui.common.addSectionHeader
 import com.movies.moviexplore.ui.common.addTrailersRow
@@ -51,8 +52,8 @@ import com.movies.moviexplore.ui.common.show
 import com.movies.moviexplore.ui.common.tickHaptic
 import com.movies.moviexplore.ui.common.showAppToast
 
-/** Episodes shown in the details screen's season row. */
-private const val EPISODE_PREVIEW_COUNT = 20
+/** Episodes shown in the details screen's season row; the rest are behind "See all episodes". */
+private const val EPISODE_PREVIEW_COUNT = 3
 
 /** A movie or TV show: artwork, info card, trailers, seasons and episodes, cast, and similar titles. */
 class DetailsActivity : BaseActivity() {
@@ -70,6 +71,7 @@ class DetailsActivity : BaseActivity() {
     private var episodeCards: ItemAdapter<Episode>? = null
     private var episodesRow: RecyclerView? = null
     private var episodesLoading: ProgressBar? = null
+    private var episodesSeeAll: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,7 +82,7 @@ class DetailsActivity : BaseActivity() {
 
         findViewById<View>(R.id.floating_back).apply {
             placeBelowStatusBar()
-            setOnClickListener { finish() }
+            setOnClickListener { goBack() }
         }
         // The info card is frosted glass over the artwork behind it.
         card.enableBlur(
@@ -207,10 +209,12 @@ class DetailsActivity : BaseActivity() {
         sections.addTrailersRow(details.videos)
 
         if (media.type == MediaType.TV && details.seasons.isNotEmpty()) {
-            sections.addSectionHeader("Choose Season") {
+            // The selected season's full episode list (through AdNavigator: an interstitial first when due).
+            val openSeason = {
                 val selected = store.state.value.selectedSeason ?: details.seasons.first().number
                 Navigator.season(this, media.id, media.title, selected, media.backdropPath)
             }
+            sections.addSectionHeader("Choose Season", onSeeAll = openSeason)
             seasonPills = ItemAdapter<Pair<SeasonInfo, Boolean>>(R.layout.item_genre_chip, key = { it.first.number }) {
                 view, (season, isSelected) ->
                 val pill = view as TextView
@@ -232,13 +236,18 @@ class DetailsActivity : BaseActivity() {
             }
             val episodesArea = sections.inflate(R.layout.view_episodes_row)
             sections.addView(episodesArea)
-            episodesRow = episodesArea.findViewById<RecyclerView>(R.id.episodes_items).also { it.adapter = episodeCards }
+            episodesRow = episodesArea.findViewById<RecyclerView>(R.id.episodes_items).also {
+                it.adapter = episodeCards
+                it.lockSwipeDirection()
+            }
             episodesLoading = episodesArea.findViewById(R.id.episodes_loading)
+            episodesSeeAll = episodesArea.findViewById<View>(R.id.episodes_see_all).apply { setOnClickListener { openSeason() } }
         } else {
             seasonPills = null
             episodeCards = null
             episodesRow = null
             episodesLoading = null
+            episodesSeeAll = null
         }
 
         sections.addCreditsRow("Actors and Creators", details.credits) { Navigator.person(this, it) }
@@ -252,7 +261,8 @@ class DetailsActivity : BaseActivity() {
         seasonPills?.submit(details.seasons.map { it to (it.number == selected) })
         episodesLoading?.show(state.episodesLoading)
         episodesRow?.show(!state.episodesLoading)
-        // A preview only; "Choose Season" opens the season's full list.
+        // A preview only; "See all episodes" (and "Choose Season") opens the season's full list.
         cards.submit(state.episodes.take(EPISODE_PREVIEW_COUNT))
+        episodesSeeAll?.show(!state.episodesLoading && state.episodes.size > EPISODE_PREVIEW_COUNT)
     }
 }

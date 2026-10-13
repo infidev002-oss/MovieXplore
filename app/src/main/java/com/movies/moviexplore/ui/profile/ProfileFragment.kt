@@ -87,7 +87,6 @@ class ProfileFragment : TabFragment(R.layout.tab_profile) {
             }
             clipToOutline = true
         }
-        view.findViewById<View>(R.id.profile_tmdb).setOnClickListener { activity.openLink("https://www.themoviedb.org") }
         scroll.addOnLayoutChangeListener { _, left, _, right, _, _, _, _, _ -> fitContentWidth(right - left) }
 
         viewScope.launch { store.state.collect { render(it) } }

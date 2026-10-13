@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import com.movies.moviexplore.R
+import com.movies.moviexplore.ads.AdNavigator
 import com.movies.moviexplore.config.RemoteValues
 import com.movies.moviexplore.playstore.AppReview
 import com.movies.moviexplore.playstore.InAppUpdate
@@ -44,6 +45,9 @@ class MainActivity : BaseActivity() {
     // Home's artwork runs edge to edge; each tab keeps its own text and controls clear (TabFragment.setSideSpace).
     override val padsSides = false
 
+    // Back here leaves the app (or returns to Home): never an interstitial.
+    override val showAdOnBack = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -63,7 +67,12 @@ class MainActivity : BaseActivity() {
                 }
             }
         }
-        Tab.entries.forEach { tab -> findViewById<View>(tab.buttonId).setOnClickListener { select(tab) } }
+        // Switching to another tab goes through the kit's AdNavigator (interstitial first when due); tapping the open tab doesn't.
+        Tab.entries.forEach { tab ->
+            findViewById<View>(tab.buttonId).setOnClickListener {
+                if (tab == current) select(tab) else AdNavigator.showThen(this) { select(tab) }
+            }
+        }
 
         val banner = findViewById<View>(R.id.main_banner)
         bindBanner(this, RemoteValues.BANNER_HOME, banner, atBottom = false)
@@ -129,8 +138,9 @@ class MainActivity : BaseActivity() {
             styleTabBar()
         }
         fragmentFor(tab)?.scrollToTop()
-        // Back from another tab returns to Home before leaving the app.
-        interceptBack(if (tab == Tab.HOME) null else ({ select(Tab.HOME) }))
+        // Back from another tab returns to Home before leaving the app, through the kit's AdNavigator (interstitial
+        // first when due). Back on Home leaves the app: never an ad there.
+        interceptBack(if (tab == Tab.HOME) null else ({ AdNavigator.showThen(this) { select(Tab.HOME) } }))
     }
 
     private fun styleTabBar() {

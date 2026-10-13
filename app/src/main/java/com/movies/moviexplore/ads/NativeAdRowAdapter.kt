@@ -19,7 +19,8 @@ import kotlinx.coroutines.launch
  *   private lateinit var nativeRow: NativeAdRowAdapter
  *
  *   onCreate / onViewCreated:
- *     nativeRow = NativeAdRowAdapter(lifecycleOwner, categoryNative, RemoteValues.NATIVE_CATEGORY, NativeSize.MEDIUM)
+ *     nativeRow = NativeAdRowAdapter(lifecycleOwner, categoryNative, RemoteValues.NATIVE_CATEGORY, NativeSize.MEDIUM,
+ *         marginDp = 10)   // spacing around the ad, your design (default 0: the kit adds none)
  *     recyclerView.adapter = ConcatAdapter(nativeRow, postersAdapter)
  *     // grid: (layoutManager as GridLayoutManager).spanSizeLookup = nativeRow.fullSpanLookup(spanCount)
  *   onResume (when visible) and onHiddenChanged(false):
@@ -33,7 +34,8 @@ class NativeAdRowAdapter(
     owner: LifecycleOwner,
     private val viewModel: NativeAdViewModel,
     private val unitKey: String,
-    private val size: NativeSize = NativeSize.MEDIUM
+    private val size: NativeSize = NativeSize.MEDIUM,
+    private val marginDp: Int = 0                    // spacing around the ad on every side (the kit adds none)
 ) : RecyclerView.Adapter<NativeAdRowAdapter.Holder>() {
 
     class Holder(val slot: FrameLayout) : RecyclerView.ViewHolder(slot)
@@ -71,7 +73,10 @@ class NativeAdRowAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder =
         Holder(FrameLayout(parent.context).apply {
-            layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+            layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                val px = (marginDp * parent.resources.displayMetrics.density).toInt()
+                setMargins(px, px, px, px)
+            }
         })
 
     override fun onBindViewHolder(holder: Holder, position: Int) {

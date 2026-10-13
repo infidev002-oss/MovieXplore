@@ -1,6 +1,8 @@
 package com.movies.moviexplore.ui.common
 
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
@@ -11,6 +13,7 @@ import com.movies.moviexplore.data.model.Credit
 import com.movies.moviexplore.data.model.Media
 import com.movies.moviexplore.data.model.TmdbImage
 import com.movies.moviexplore.data.model.Video
+import kotlin.math.abs
 
 /** Fills an `item_poster` card with [media]. */
 fun View.bindPoster(media: Media, onClick: (Media) -> Unit) {
@@ -46,8 +49,47 @@ fun ViewGroup.addSectionHeader(title: String, onSeeAll: (() -> Unit)? = null): V
 /** Adds an empty sideways-scrolling row (a horizontal RecyclerView) to [this] and returns it. */
 fun ViewGroup.addHorizontalRow(): RecyclerView {
     val row = inflate(R.layout.view_horizontal_row) as RecyclerView
+    row.lockSwipeDirection()
     addView(row)
     return row
+}
+
+/**
+ * For a sideways row inside a vertical ScrollView: decides each swipe once, by its main direction. A mostly sideways
+ * swipe stays with the row (the page can't take it over halfway, even when the finger drifts up or down); a mostly
+ * vertical one goes to the page. At the row's end, a sideways swipe is left to the page as usual.
+ */
+fun RecyclerView.lockSwipeDirection() {
+    val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+    addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
+        private var startX = 0f
+        private var startY = 0f
+        private var decided = false
+
+        override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+            when (e.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    startX = e.x
+                    startY = e.y
+                    decided = false
+                    // Until the direction is known, the page must not take the gesture on a small vertical drift.
+                    rv.parent?.requestDisallowInterceptTouchEvent(true)
+                }
+                MotionEvent.ACTION_MOVE -> if (!decided) {
+                    val dx = e.x - startX
+                    val dy = e.y - startY
+                    if (abs(dx) > touchSlop || abs(dy) > touchSlop) {
+                        decided = true
+                        val sideways = abs(dx) > abs(dy) && rv.canScrollHorizontally(if (dx < 0) 1 else -1)
+                        rv.parent?.requestDisallowInterceptTouchEvent(sideways)
+                    }
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL ->
+                    rv.parent?.requestDisallowInterceptTouchEvent(false)
+            }
+            return false
+        }
+    })
 }
 
 /** Adds a sideways row showing [items], each row item drawn from [layout] by [bind]. */

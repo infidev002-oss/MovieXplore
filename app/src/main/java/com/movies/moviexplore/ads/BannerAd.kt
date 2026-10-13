@@ -92,7 +92,7 @@ class BannerAd private constructor(
                     root.visibility = View.VISIBLE          // also when it arrives after the timeout
                 }
                 override fun onAdFailedToLoad(error: LoadAdError) { index++; loadCurrent() }
-                override fun onAdClicked() { AdState.markAdClicked() }
+                override fun onAdClicked() { AdState.markAdClicked(activity) }
             }
         }
         adView = view

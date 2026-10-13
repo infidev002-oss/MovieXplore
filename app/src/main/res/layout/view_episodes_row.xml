@@ -1,30 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- TV details: the selected season's episode cards in a sideways row, with a spinner while they load. -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    TV details: a preview of the selected season's episode cards in a sideways row (a spinner while they load),
+    then "See all episodes" when the season has more than the preview, opening the season screen.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="@dimen/_125sdp">
+    android:orientation="vertical">
 
-    <!-- Episode cards (item_episode_card), filled by DetailsActivity. -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/episodes_items"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clipToPadding="false"
-        android:orientation="horizontal"
-        android:overScrollMode="ifContentScrolls"
-        android:paddingStart="@dimen/_13sdp"
-        android:paddingTop="@dimen/_13sdp"
-        android:paddingEnd="@dimen/_3sdp"
-        android:paddingBottom="@dimen/_13sdp"
-        android:scrollbars="none"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        android:minHeight="@dimen/_125sdp">
 
-    <ProgressBar
-        android:id="@+id/episodes_loading"
-        android:layout_width="@dimen/_33sdp"
-        android:layout_height="@dimen/_33sdp"
-        android:layout_gravity="center"
-        android:indeterminateTint="@color/primary" />
-</FrameLayout>
+        <!-- Episode cards (item_episode_card), filled by DetailsActivity. -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/episodes_items"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:overScrollMode="ifContentScrolls"
+            android:paddingStart="@dimen/_13sdp"
+            android:paddingTop="@dimen/_13sdp"
+            android:paddingEnd="@dimen/_3sdp"
+            android:paddingBottom="@dimen/_13sdp"
+            android:scrollbars="none"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        <ProgressBar
+            android:id="@+id/episodes_loading"
+            android:layout_width="@dimen/_33sdp"
+            android:layout_height="@dimen/_33sdp"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/primary" />
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/episodes_see_all"
+        style="@style/Button.Outline"
+        android:layout_width="match_parent"
+        android:layout_marginStart="@dimen/_13sdp"
+        android:layout_marginEnd="@dimen/_13sdp"
+        android:layout_marginBottom="@dimen/_5sdp"
+        android:drawableEnd="@drawable/ic_chevron_right_small"
+        android:text="See all episodes"
+        android:visibility="gone" />
+</LinearLayout>

@@ -11,9 +11,7 @@ import android.os.SystemClock
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
@@ -78,7 +76,8 @@ object WelcomeBack : DefaultLifecycleObserver, Application.ActivityLifecycleCall
     fun isEnabled(context: Context): Boolean =
         installed && AdsConsent.canRequestAds(context) &&
             RemoteValues.isAdUnitEnabled(RemoteValues.WELCOME_INTER) &&
-            RemoteValues.adUnitIds(RemoteValues.WELCOME_INTER).isNotEmpty()
+            RemoteValues.adUnitIds(RemoteValues.WELCOME_INTER).isNotEmpty() &&
+            !AdState.clickLimitReached(context)
 
     // ---------- app foreground / background ----------
 
@@ -145,23 +144,15 @@ object WelcomeBack : DefaultLifecycleObserver, Application.ActivityLifecycleCall
         val current = ad?.takeIf { SystemClock.elapsedRealtime() - loadedAt < EXPIRY_MS }
         if (current == null || !isEnabled(activity) || !AdNavigator.isInterstitialDue(activity) ||
             activity.isFinishing || activity.isDestroyed) { next(); return }
-        ad = null
-        _state.value = LoadState.IDLE
-        val overlay = AdLoadingOverlay.show(activity)
-        var done = false
-        val finish = {
-            if (!done) { done = true; overlay.dismiss(); AdState.fullScreenAdShowing = false; next() }
+        InterstitialShow.run(activity, current) { end, _ ->
+            when (end) {
+                InterstitialShow.End.CLOSED -> {
+                    if (ad === current) { ad = null; _state.value = LoadState.IDLE }
+                    next()
+                }
+                InterstitialShow.End.BACKGROUND -> next()             // app in the background: ad kept, continue
+                InterstitialShow.End.SCREEN_GONE -> Unit
+            }
         }
-        current.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdShowedFullScreenContent() { overlay.dismiss(); AdState.fullScreenAdShowing = true }
-            override fun onAdDismissedFullScreenContent() { finish() }
-            override fun onAdFailedToShowFullScreenContent(error: AdError) { finish() }
-            override fun onAdClicked() { AdState.markAdClicked() }
-        }
-        main.postDelayed({
-            if (activity.isFinishing || activity.isDestroyed) { overlay.dismiss(); return@postDelayed }
-            AdNavigator.markInterstitialShown(activity)
-            try { current.show(activity) } catch (_: Exception) { finish() }
-        }, AdLoadingOverlay.SHOW_DELAY_MS)
     }
 }

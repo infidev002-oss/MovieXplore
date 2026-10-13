@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="playstore_update_title">Update required</string>
-    <string name="playstore_update_message">A new version is available. Please update to keep using the app.</string>
-    <string name="playstore_update_button">Update</string>
-</resources>

@@ -53,11 +53,19 @@
             android:gravity="center"
             android:text="Please wait…" />
 
-        <!-- Splash banner (RemoteValues.BANNER_SPLASH), loaded by the kit's SplashFlow. -->
+        <!-- Always the banner's height (set in SplashActivity), so the progress stays in place with or without an ad. -->
         <FrameLayout
-            android:id="@+id/splash_banner"
+            android:id="@+id/splash_banner_space"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone" />
+            android:layout_height="wrap_content">
+
+            <!-- Splash banner (RemoteValues.BANNER_SPLASH), loaded by the kit's SplashFlow. -->
+            <FrameLayout
+                android:id="@+id/splash_banner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:visibility="gone" />
+        </FrameLayout>
     </LinearLayout>
 </FrameLayout>

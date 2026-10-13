@@ -12,8 +12,10 @@
 
     <ImageButton
         android:id="@+id/top_bar_back"
-        android:layout_width="@dimen/_40sdp"
-        android:layout_height="@dimen/_40sdp"
+        android:layout_width="@dimen/_35sdp"
+        android:layout_height="@dimen/_35sdp"
+        android:padding="@dimen/_3sdp"
+        android:scaleType="fitCenter"
         android:background="@android:color/transparent"
         android:stateListAnimator="@animator/press_scale"
         android:contentDescription="Back"

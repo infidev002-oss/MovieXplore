@@ -14,7 +14,7 @@
 
     <!-- Poster grids (category, mood results, browse). -->
     <dimen name="grid_gap_horizontal">@dimen/_8sdp</dimen>
-    <dimen name="grid_gap_vertical">@dimen/_15sdp</dimen>
+    <dimen name="grid_gap_vertical">@dimen/_5sdp</dimen>
 
     <!-- Extra height under the status bar for the fading scrim at the top of scrolling screens. -->
     <dimen name="status_scrim_extra">@dimen/_13sdp</dimen>

@@ -22,7 +22,7 @@ import com.movies.moviexplore.ui.common.onSystemBars
 class CategoryActivity : BaseActivity() {
 
     private val categoryNative by lazy { NativeAds.viewModel(this, RemoteValues.NATIVE_CATEGORY) }
-    private var nativeRow: NativeAdRowAdapter? = null   // genre lists only
+    private var nativeRow: NativeAdRowAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,12 +35,11 @@ class CategoryActivity : BaseActivity() {
             genreId = intent.getIntExtra(Navigator.EXTRA_GENRE, 0),
         )
         val store = CategoryStore(MediaRepository.shared, request).attach()
-        // The category ads (native first in the grid, banner at the bottom) belong to a selected genre's list
-        // only, not to Trending / Popular / Top Rated.
-        val isGenreList = request.list == CategoryList.GENRE
-        if (isGenreList) nativeRow = NativeAdRowAdapter(this, categoryNative, RemoteValues.NATIVE_CATEGORY, NativeSize.MEDIUM)
+        // The category ads (native first in the grid, banner at the bottom) on every list: a selected genre and,
+        // by the developer's choice, the Home "See all" lists (Trending / Popular / Top Rated) too.
+        nativeRow = NativeAdRowAdapter(this, categoryNative, RemoteValues.NATIVE_CATEGORY, NativeSize.MEDIUM)
 
-        findViewById<View>(R.id.top_bar).bindTopBar(request.title, onBack = ::finish)
+        findViewById<View>(R.id.top_bar).bindTopBar(request.title, onBack = ::goBack)
         val gridRoot = findViewById<View>(R.id.screen_grid)
         val grid = PagedGrid(
             root = gridRoot,
@@ -53,7 +52,7 @@ class CategoryActivity : BaseActivity() {
 
         store.state.observe { grid.render(it.items, it.isLoading, it.isLoadingMore, it.error) }
 
-        if (isGenreList) bindBanner(this, RemoteValues.BANNER_CAT, findViewById(R.id.banner_root))
+        bindBanner(this, RemoteValues.BANNER_CAT, findViewById(R.id.banner_root))
     }
 
     override fun onResume() {
