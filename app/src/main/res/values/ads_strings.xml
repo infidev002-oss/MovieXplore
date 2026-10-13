@@ -4,6 +4,6 @@
     <string name="ads_native_badge">Ad</string>
     <string name="ads_banner_placeholder">Advertisement</string>
     <string name="ads_welcome_back">Welcome back</string>
-    <string name="ads_welcome_subtitle">Tap Start to continue where you left off in %1$s.</string>
+    <string name="ads_welcome_subtitle">Your movies and shows are right where you left them in %1$s.</string>
     <string name="ads_welcome_start">Start</string>
 </resources>

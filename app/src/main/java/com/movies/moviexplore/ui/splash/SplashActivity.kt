@@ -24,7 +24,8 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
         findViewById<View>(R.id.splash_bottom).padForSystemBars(bottom = true)
-        reserveBannerSpace(findViewById(R.id.splash_banner_space))
+        val banner = findViewById<FrameLayout>(R.id.splash_banner)
+        reserveBannerSpace(findViewById(R.id.splash_banner_space), banner)
         val status = findViewById<TextView>(R.id.splash_status)
         flow.start(
             onStatus = { state ->
@@ -33,7 +34,7 @@ class SplashActivity : AppCompatActivity() {
                     SplashFlow.Status.LOADING -> "Please wait…"
                 }
             },
-            bannerContainer = findViewById<FrameLayout>(R.id.splash_banner),
+            bannerContainer = banner,
             onDone = { destination ->
                 // A destination from the kit (e.g. a notification) always wins; then any unfinished onboarding step.
                 startActivity(destination ?: OnboardingFlow.nextStep(this) ?: Intent(this, MainActivity::class.java))
@@ -45,13 +46,16 @@ class SplashActivity : AppCompatActivity() {
     /**
      * Keeps [space] as tall as the splash banner (the size the kit's BannerAd picks: large or standard anchored,
      * from the unit's "size"), so the progress and status sit above the banner's place even when no ad shows.
-     * Re-measured when the width changes (the splash handles rotation itself).
+     * Re-measured when the width changes (the splash handles rotation itself). Before the first Remote Config
+     * fetch (fresh install) the unit isn't known yet, so the large size (the splash default) is reserved.
+     * If the banner slot still turns out taller, the space grows to it and keeps that height after the ad hides.
      */
-    private fun reserveBannerSpace(space: View) {
+    private fun reserveBannerSpace(space: View, banner: View) {
         space.addOnLayoutChangeListener { _, left, _, right, _, oldLeft, _, oldRight, _ ->
             if (right - left == oldRight - oldLeft) return@addOnLayoutChangeListener
             val widthDp = ((right - left) / resources.displayMetrics.density).toInt()
-            val size = if (RemoteValues.bannerLarge(RemoteValues.BANNER_SPLASH)) {
+            val unknown = RemoteValues.adUnitIds(RemoteValues.BANNER_SPLASH).isEmpty()
+            val size = if (unknown || RemoteValues.bannerLarge(RemoteValues.BANNER_SPLASH)) {
                 AdSize.getLargeAnchoredAdaptiveBannerAdSize(this, widthDp)
             } else {
                 @Suppress("DEPRECATION")
@@ -59,6 +63,12 @@ class SplashActivity : AppCompatActivity() {
             }
             val height = size.getHeightInPixels(this)
             if (space.minimumHeight != height) space.post { space.minimumHeight = height; space.requestLayout() }
+        }
+        banner.addOnLayoutChangeListener { v, _, top, _, bottom, _, _, _, _ ->
+            val height = bottom - top
+            if (v.visibility == View.VISIBLE && height > space.minimumHeight) {
+                space.post { space.minimumHeight = height; space.requestLayout() }
+            }
         }
     }
 }
