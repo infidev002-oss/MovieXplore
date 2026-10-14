@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="200dp"
+    android:height="300dp"
+    android:viewportWidth="200"
+    android:viewportHeight="300">
+    <!-- Dummy poster art (no real film): a smiling star. -->
+    <path android:pathData="M0,0h200v300h-200z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="0" android:startY="0" android:endX="120" android:endY="300"
+                android:startColor="#FFFFD54F" android:endColor="#FFE65100" />
+        </aapt:attr>
+    </path>
+    <path android:fillColor="#FFFFFFFF" android:fillAlpha="0.7" android:pathData="M36,60a4,4 0,1 0,8,0a4,4 0,1 0,-8,0z" />
+    <path android:fillColor="#FFFFFFFF" android:fillAlpha="0.7" android:pathData="M157,90a3,3 0,1 0,6,0a3,3 0,1 0,-6,0z" />
+    <path android:fillColor="#FFFFFFFF" android:fillAlpha="0.7" android:pathData="M42,220a3,3 0,1 0,6,0a3,3 0,1 0,-6,0z" />
+    <path android:fillColor="#FFFFFFFF" android:fillAlpha="0.7" android:pathData="M161,215a4,4 0,1 0,8,0a4,4 0,1 0,-8,0z" />
+    <path android:fillColor="#FFFFF8E1"
+        android:pathData="M100,95L116.5,127.3L152.3,133L126.6,158.7L132.3,194.5L100,178L67.7,194.5L73.4,158.7L47.7,133L83.5,127.3Z" />
+    <path android:fillColor="#FF5D4037" android:pathData="M86,145a4,4 0,1 0,8,0a4,4 0,1 0,-8,0z" />
+    <path android:fillColor="#FF5D4037" android:pathData="M106,145a4,4 0,1 0,8,0a4,4 0,1 0,-8,0z" />
+    <path android:strokeColor="#FF5D4037" android:strokeWidth="3" android:strokeLineCap="round"
+        android:pathData="M90,157Q100,166 110,157" />
+    <!-- Title lines, like a poster's credits. -->
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.85" android:pathData="M30,258h110v9h-110z" />
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.5" android:pathData="M30,274h70v6h-70z" />
+</vector>

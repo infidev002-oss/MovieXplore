@@ -2,11 +2,7 @@ package com.movies.moviexplore.ui.profile
 
 import com.google.firebase.auth.AuthCredential
 import com.movies.moviexplore.auth.AuthManager
-import com.movies.moviexplore.data.MediaRepository
-import com.movies.moviexplore.data.model.TmdbImage
 import com.movies.moviexplore.mvi.MviStore
-import com.movies.moviexplore.ui.common.safeCall
-import kotlinx.coroutines.launch
 
 /** The signed-in Google user's display details; null when signed out. */
 data class Account(val name: String, val email: String?, val photoUrl: String?)
@@ -16,8 +12,6 @@ data class ProfileUiState(
     val isSigningIn: Boolean = false,
     val confirmDelete: Boolean = false,
     val isDeleting: Boolean = false,
-    /** Trending poster URLs for the sign-in panel's movie-poster backdrop; empty until loaded (or offline). */
-    val posters: List<String> = emptyList(),
 )
 
 sealed interface ProfileIntent {
@@ -57,17 +51,6 @@ sealed interface ProfileEffect {
 
 /** Sign-in, sign-out and account deletion all go through the kit's AuthManager. */
 class ProfileStore : MviStore<ProfileUiState, ProfileIntent, ProfileEffect>(ProfileUiState(account = currentAccount())) {
-
-    init {
-        // A few trending posters for the sign-in panel. Home loads the same list, so it usually comes from the cache.
-        scope.launch {
-            val posters = safeCall { MediaRepository.shared.trending(type = null) }.getOrNull()
-                ?.items.orEmpty()
-                .mapNotNull { TmdbImage.poster(it.posterPath) }
-                .take(SIGN_IN_POSTERS)
-            reduce { copy(posters = posters) }
-        }
-    }
 
     override fun onIntent(intent: ProfileIntent) {
         when (intent) {
@@ -129,8 +112,6 @@ class ProfileStore : MviStore<ProfileUiState, ProfileIntent, ProfileEffect>(Prof
     }
 
     private companion object {
-        const val SIGN_IN_POSTERS = 4
-
         fun currentAccount(): Account? = AuthManager.currentUser()?.let { user ->
             Account(
                 name = user.displayName?.takeIf { it.isNotBlank() } ?: user.email.orEmpty(),

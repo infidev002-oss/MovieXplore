@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="200dp"
+    android:height="300dp"
+    android:viewportWidth="200"
+    android:viewportHeight="300">
+    <!-- Dummy poster art (no real film): a smiling popcorn bucket. -->
+    <path android:pathData="M0,0h200v300h-200z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="0" android:startY="0" android:endX="120" android:endY="300"
+                android:startColor="#FFFF7A6B" android:endColor="#FFB0302A" />
+        </aapt:attr>
+    </path>
+    <path android:fillColor="#FFFFF3C4" android:pathData="M49,132a16,16 0,1 0,32,0a16,16 0,1 0,-32,0z" />
+    <path android:fillColor="#FFFFF3C4" android:pathData="M72,120a18,18 0,1 0,36,0a18,18 0,1 0,-36,0z" />
+    <path android:fillColor="#FFFFF3C4" android:pathData="M97,122a18,18 0,1 0,36,0a18,18 0,1 0,-36,0z" />
+    <path android:fillColor="#FFFFF3C4" android:pathData="M123,132a15,15 0,1 0,30,0a15,15 0,1 0,-30,0z" />
+    <path android:fillColor="#FFFFF3C4" android:pathData="M64,106a14,14 0,1 0,28,0a14,14 0,1 0,-28,0z" />
+    <path android:fillColor="#FFFFF3C4" android:pathData="M90,98a15,15 0,1 0,30,0a15,15 0,1 0,-30,0z" />
+    <path android:fillColor="#FFFFF3C4" android:pathData="M113,108a13,13 0,1 0,26,0a13,13 0,1 0,-26,0z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M55,140L145,140L132,240L68,240Z" />
+    <path android:fillColor="#FFE53935" android:pathData="M73,140L91,140L93.6,240L80.8,240Z" />
+    <path android:fillColor="#FFE53935" android:pathData="M109,140L127,140L119.2,240L106.4,240Z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M50,134h100v10h-100z" />
+    <path android:fillColor="#FF3E2723" android:pathData="M83,185a5,5 0,1 0,10,0a5,5 0,1 0,-10,0z" />
+    <path android:fillColor="#FF3E2723" android:pathData="M107,185a5,5 0,1 0,10,0a5,5 0,1 0,-10,0z" />
+    <path android:strokeColor="#FF3E2723" android:strokeWidth="4" android:strokeLineCap="round"
+        android:pathData="M88,203Q100,215 112,203" />
+    <!-- Title lines, like a poster's credits. -->
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.85" android:pathData="M30,258h110v9h-110z" />
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.5" android:pathData="M30,274h70v6h-70z" />
+</vector>

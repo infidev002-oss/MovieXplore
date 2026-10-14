@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="200dp"
+    android:height="300dp"
+    android:viewportWidth="200"
+    android:viewportHeight="300">
+    <!-- Dummy poster art (no real film): a cinema ticket. -->
+    <path android:pathData="M0,0h200v300h-200z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="0" android:startY="0" android:endX="120" android:endY="300"
+                android:startColor="#FFFF9DBB" android:endColor="#FFAD1457" />
+        </aapt:attr>
+    </path>
+    <group android:rotation="-12" android:pivotX="100" android:pivotY="150">
+        <path android:fillColor="#FFFFE082"
+            android:pathData="M40,110H160V140A10,10 0,0 0,160,160V190H40V160A10,10 0,0 0,40,140Z" />
+        <path android:fillColor="#FFC2185B" android:pathData="M55,132h55v9h-55z" />
+        <path android:fillColor="#FFC2185B" android:fillAlpha="0.6" android:pathData="M55,150h40v7h-40z" />
+        <path android:fillColor="#FFC2185B" android:fillAlpha="0.6" android:pathData="M55,165h48v7h-48z" />
+        <path android:fillColor="#FFC2185B" android:pathData="M124,116h2v8h-2zM124,130h2v8h-2zM124,144h2v8h-2zM124,158h2v8h-2zM124,172h2v8h-2z" />
+        <path android:fillColor="#FFC2185B" android:pathData="M142,138L145.5,146L154,146.5L147.5,152L149.5,160.5L142,156L134.5,160.5L136.5,152L130,146.5L138.5,146Z" />
+    </group>
+    <!-- Title lines, like a poster's credits. -->
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.85" android:pathData="M30,258h110v9h-110z" />
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.5" android:pathData="M30,274h70v6h-70z" />
+</vector>

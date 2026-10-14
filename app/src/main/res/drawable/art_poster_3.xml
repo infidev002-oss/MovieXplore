@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="200dp"
+    android:height="300dp"
+    android:viewportWidth="200"
+    android:viewportHeight="300">
+    <!-- Dummy poster art (no real film): a film reel. -->
+    <path android:pathData="M0,0h200v300h-200z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="0" android:startY="0" android:endX="120" android:endY="300"
+                android:startColor="#FF3FD6C8" android:endColor="#FF0F5E57" />
+        </aapt:attr>
+    </path>
+    <path android:fillColor="#FF222831" android:pathData="M140,180Q178,232 118,262L108,250Q156,226 130,188Z" />
+    <path android:fillColor="#FFE8F1F2" android:pathData="M45,150a55,55 0,1 0,110,0a55,55 0,1 0,-110,0z" />
+    <path android:fillColor="#FF1B8F85" android:pathData="M100,120m-12,0a12,12 0,1 0,24,0a12,12 0,1 0,-24,0z" />
+    <path android:fillColor="#FF1B8F85" android:pathData="M128.5,140.7m-12,0a12,12 0,1 0,24,0a12,12 0,1 0,-24,0z" />
+    <path android:fillColor="#FF1B8F85" android:pathData="M117.6,174.3m-12,0a12,12 0,1 0,24,0a12,12 0,1 0,-24,0z" />
+    <path android:fillColor="#FF1B8F85" android:pathData="M82.4,174.3m-12,0a12,12 0,1 0,24,0a12,12 0,1 0,-24,0z" />
+    <path android:fillColor="#FF1B8F85" android:pathData="M71.5,140.7m-12,0a12,12 0,1 0,24,0a12,12 0,1 0,-24,0z" />
+    <path android:fillColor="#FF1B8F85" android:pathData="M93,150a7,7 0,1 0,14,0a7,7 0,1 0,-14,0z" />
+    <!-- Title lines, like a poster's credits. -->
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.85" android:pathData="M30,258h110v9h-110z" />
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.5" android:pathData="M30,274h70v6h-70z" />
+</vector>

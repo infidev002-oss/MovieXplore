@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Welcome-back screen (kit WelcomeBackActivity), movie-app style: a tilted wall of trending posters behind,
+<!-- Welcome-back screen (kit WelcomeBackActivity), movie-app style: a tilted wall of cartoon poster art (no TMDB images) behind,
      fading into the app background, with "Welcome back" and the white Start pill at the bottom.
      Kit contract (AGENTS.md §4): ads_welcome_start (required; disabled by the kit until the ad is ready),
      ads_welcome_subtitle and ads_welcome_progress. One layout for portrait and landscape; the content scrolls. -->

@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.graphics.Outline
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -115,7 +114,6 @@ class ProfileFragment : TabFragment(R.layout.tab_profile) {
     private fun render(state: ProfileUiState) {
         val account = state.account
         signIn.show(account == null)
-        if (account == null) renderPosters(state.posters)
         googleSignIn.isEnabled = !state.isSigningIn
         user.show(account != null)
         if (account != null) renderAccount(account)
@@ -156,17 +154,6 @@ class ProfileFragment : TabFragment(R.layout.tab_profile) {
         } else if (!state.isDeleting) {
             deletingDialog?.dismiss()
             deletingDialog = null
-        }
-    }
-
-    /** The sign-in panel's poster backdrop: one trending poster per slot. */
-    private fun renderPosters(posters: List<String>) {
-        val slots = root.findViewById<ViewGroup>(R.id.profile_sign_in_posters)
-        for (i in 0 until slots.childCount) {
-            val slot = slots.getChildAt(i) as ImageView
-            val url = posters.getOrNull(i)
-            // Re-renders happen on every visit: only load a slot when its poster changed.
-            if (url != null && slot.getTag(R.id.image_url) != url) ImageLoader.load(slot, url)
         }
     }
 

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="200dp"
+    android:height="300dp"
+    android:viewportWidth="200"
+    android:viewportHeight="300">
+    <!-- Dummy poster art (no real film): a rocket in space. -->
+    <path android:pathData="M0,0h200v300h-200z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="0" android:startY="0" android:endX="120" android:endY="300"
+                android:startColor="#FF4A5BC4" android:endColor="#FF0D1340" />
+        </aapt:attr>
+    </path>
+    <path android:fillColor="#FFFFFFFF" android:pathData="M28,40a2,2 0,1 0,4,0a2,2 0,1 0,-4,0z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M59,80a1,1 0,1 0,2,0a1,1 0,1 0,-2,0z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M168,130a2,2 0,1 0,4,0a2,2 0,1 0,-4,0z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M39,160a1,1 0,1 0,2,0a1,1 0,1 0,-2,0z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M159,200a1,1 0,1 0,2,0a1,1 0,1 0,-2,0z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M23,210a2,2 0,1 0,4,0a2,2 0,1 0,-4,0z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M89,50a1,1 0,1 0,2,0a1,1 0,1 0,-2,0z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M179,30a1,1 0,1 0,2,0a1,1 0,1 0,-2,0z" />
+    <path android:fillColor="#FFFFF59D" android:pathData="M128,70a22,22 0,1 0,44,0a22,22 0,1 0,-44,0z" />
+    <path android:fillColor="#FFFFB300" android:pathData="M88,198Q100,242 112,198Z" />
+    <path android:fillColor="#FFEF5350" android:pathData="M86,175L66,212L88,204Z" />
+    <path android:fillColor="#FFEF5350" android:pathData="M114,175L134,212L112,204Z" />
+    <path android:fillColor="#FFECEFF1" android:pathData="M100,98C121,124 123,170 115,202H85C77,170 79,124 100,98Z" />
+    <path android:fillColor="#FFEF5350" android:pathData="M100,98C108,108 112,116 114,124H86C88,116 92,108 100,98Z" />
+    <path android:fillColor="#FF90A4AE" android:pathData="M86,145a14,14 0,1 0,28,0a14,14 0,1 0,-28,0z" />
+    <path android:fillColor="#FF42A5F5" android:pathData="M90,145a10,10 0,1 0,20,0a10,10 0,1 0,-20,0z" />
+    <!-- Title lines, like a poster's credits. -->
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.85" android:pathData="M30,258h110v9h-110z" />
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.5" android:pathData="M30,274h70v6h-70z" />
+</vector>
